@@ -8,14 +8,14 @@
 #include <iostream>
 #include "math/rm.h"
 
-class Engine 
+class Engine
 {
 public:
 
-    
+
 private:
-    
+
 };
-    
+
 
 #endif

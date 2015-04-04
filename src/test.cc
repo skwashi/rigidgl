@@ -8,55 +8,74 @@
 #include "math/tr3.h"
 #include "camera.h"
 
+#include <GLFW/glfw3.h>
+
 
 using namespace std;
 using namespace rm;
 using namespace glm;
 
+static void error_callback(int error, const char* desc) 
+{
+    fputs(desc, stderr);
+}
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
 int main(int argc, char* argv[])
 {
-    // Mat3 m = Mat3(1) + Mat3(2);
-    // Vec3 v = Vec3(0, 2, 1);
-    
-    // std::cout << m << std::endl;
-    // std::cout << v << std::endl;
-    // std::cout << m * v << std::endl;
 
-    // quat q = angleAxis(R_PI/2, vec3(0, 0, 1));
-    vec3 p = vec3(1, 0, 0);
-    // quat q2 = angleAxis(R_PI/2, vec3(1, 0, 0));
-    
-    // vec3 p2 = p * q;
-    // p = q * p * q;
-    
-    // cout << p.x << endl << p.y << endl << p.z << endl;
-    // cout << p2.x << endl << p2.y << endl << p2.z << endl;
+    if (!glfwInit())
+        exit(EXIT_FAILURE);
 
+    glfwSetErrorCallback(error_callback);
 
-    quat q = angleAxis(R_PI/2 , glm::vec3(0, 1, 0));
+    GLFWwindow* window = glfwCreateWindow(640, 480, "Title", NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        exit(EXIT_FAILURE);
+    }
 
-    Tr3 tr = Tr3(q, 1, 0, 1);
+    glfwMakeContextCurrent(window);
+    glfwSwapInterval(1);
+    glfwSetKeyCallback(window, key_callback);
 
-    Tr3 tr2;
-    vec3 dir = vec3(0, 0, -1);
-    vec3 up = vec3(-1, 0, 0);
+    while(!glfwWindowShouldClose(window)) {
+        // keep running
+        float ratio;
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+        ratio = width / (float) height;
 
-    tr2.setRotation(cross(dir, up), up, -dir);
-    
-    mat3 mat = mat3_cast(q);
-    mat3 mat2;
-    mat2[0] = vec3(0, 0, -1);
-    mat2[1] = vec3(0, 1, 0);
-    mat2[2] = vec3(1, 0, 0);
-    
+        double time = glfwGetTime();
+        glViewport(0, 0, width, height);
 
-    Camera cam = Camera(45 * DEG_TO_RAD, 1, 1, 1000);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-ratio, ratio, -1, 1, 1, -1);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glRotatef((float) time * 50, 0, 0, 1);
 
-    cam.translate(0, 10, 100);
-    cam.rotate(R_PI/4, 0, 1, 0);
-    cout << to_string(cam.getPosition()) << endl;
-    cam.translateLocally(0, 0, -50);
-    cout << to_string(cam.getPosition()) << endl;
+        glBegin(GL_TRIANGLES);
+        glColor3f(1, 0, 0);
+        glVertex3f(-0.6f, -0.4f, 0.f);
+        glColor3f(0, 1, 0);
+        glVertex3f(0.6f, -0.4f, 0.f);
+        glColor3f(0, 0, 1);
+        glVertex3f(0.f, 0.6f, 0.f);
+        glEnd();
 
-    return 0;
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    exit(EXIT_SUCCESS);
 }

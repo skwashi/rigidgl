@@ -3,3 +3,4 @@ bin/
 GPATH
 GTAGS
 GRTAGS
+.clang_complete

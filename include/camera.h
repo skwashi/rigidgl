@@ -9,23 +9,23 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "math/movable3.h"
 
-class Camera : public rm::Movable3 
+class Camera : public rm::Movable3
 {
 public:
 
     Camera(float fov, float aspectRatio, float near, float far) :
-        fov(fov), aspectRatio(aspectRatio), near(near), far(far) 
+        fov(fov), aspectRatio(aspectRatio), near(near), far(far)
     {
         computePerspective();
     }
-    
-    void setFov(float _fov) 
+
+    void setFov(float _fov)
     {
         fov = _fov;
         computePerspective();
     }
 
-    void set(float _fov, float _aspectRatio, float _near, float _far) 
+    void set(float _fov, float _aspectRatio, float _near, float _far)
     {
         fov = _fov;
         aspectRatio = _aspectRatio;
@@ -33,13 +33,13 @@ public:
         far = _far;
         computePerspective();
     }
-    
-    glm::mat4 getViewMatrix() const 
+
+    glm::mat4 getViewMatrix() const
     {
         return viewMatrix;
     }
 
-    glm::mat4 getProjectionMatrix() const 
+    glm::mat4 getProjectionMatrix() const
     {
         return projectionMatrix;
     }
@@ -49,13 +49,12 @@ public:
         viewMatrix = tX.toMat4I();
         return viewMatrix;
     }
-    
-    void update() 
+
+    void update()
     {
         computeViewMatrix();
     }
 
-    
 private:
     float fov;
     float aspectRatio;
@@ -67,13 +66,13 @@ private:
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
 
-    void computePerspective() 
+    void computePerspective()
     {
         yRatio = tan(fov / 2);
         xRatio = yRatio * aspectRatio;
         projectionMatrix = glm::perspective(fov, aspectRatio, near, far);
     }
-    
+
 };
 
 
