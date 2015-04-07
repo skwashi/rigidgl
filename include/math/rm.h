@@ -1,5 +1,5 @@
 /**
- * @author Jonas Ransjö 
+ * @author Jonas Ransjö
  */
 
 #ifndef RM_H
@@ -10,7 +10,7 @@
 #include "movable3.h"
 
 namespace rm {
-    
+
 } //namespace
- 
+
 #endif

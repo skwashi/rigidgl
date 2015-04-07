@@ -1,0 +1,13 @@
+* TASKS
+** DONE ShaderProgram
+   CLOSED: [2015-04-08 ons 01:13]
+   Compile shaders
+   Class
+** DONE Pipeline (keeping track of matrices)
+   CLOSED: [2015-04-08 ons 01:13]
+** DONE VertexArray
+   CLOSED: [2015-04-08 ons 01:13]
+** TODO Mesh
+** TODO Models
+** TODO Lighting
+   

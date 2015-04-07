@@ -1,15 +1,15 @@
 /**
- * @author Jonas Ransjö 
+ * @author Jonas Ransjö
  */
 
 #ifndef GLM_UTILS_H
 #define GLM_UTILS_H
 
-#include <glm//glm.hpp>
+#include <glm/glm.hpp>
 
 namespace glm {
-    
-    mat3 mat3fromColumns(const vec3& col1, const vec3& col2, const vec3& col3) 
+
+inline mat3 mat3fromColumns(const vec3& col1, const vec3& col2, const vec3& col3)
     {
         mat3 mat;
         mat[0] = col1;
@@ -18,7 +18,7 @@ namespace glm {
         return mat;
     }
 
-    mat4 mat4fromColumns(const vec3& col1, const vec3& col2, const vec3& col3, const vec3& col4) 
+inline mat4 mat4fromColumns(const vec3& col1, const vec3& col2, const vec3& col3, const vec3& col4)
     {
         mat4 mat;
         mat[0] = vec4(col1, 0);
@@ -28,7 +28,7 @@ namespace glm {
         return mat;
     }
 
-    
+
 } //namespace
 
 #endif

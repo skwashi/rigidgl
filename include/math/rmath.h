@@ -1,5 +1,5 @@
 /**
- * @author Jonas Ransjö 
+ * @author Jonas Ransjö
  */
 
 #ifndef R_MATH_H
@@ -16,26 +16,26 @@
 #define RAD_TO_DEG (180.0f / R_PI)
 
 namespace rm {
-    
-    using std::min;
-    using std::max;
-    using std::sqrt;
-    using std::abs;
-    using std::atan2;
-    
-    typedef unsigned int uint;
-    
-    inline bool isZero(float x)
-    {
-        return (x < R_EPSILON && x > -R_EPSILON);
-    }
 
-    inline bool isZero(double x) 
-    {
-        return (x < DBL_EPSILON && x > -DBL_EPSILON);        
-    }
-    
+using std::min;
+using std::max;
+using std::sqrt;
+using std::abs;
+using std::atan2;
+
+typedef unsigned int uint;
+
+inline bool isZero(float x)
+{
+    return (x < R_EPSILON && x > -R_EPSILON);
+}
+
+inline bool isZero(double x)
+{
+    return (x < DBL_EPSILON && x > -DBL_EPSILON);
+}
+
 } //namespace
- 
+
 
 #endif
