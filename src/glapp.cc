@@ -6,6 +6,7 @@
 #include <fstream>
 #include <streambuf>
 #include <stdlib.h>
+#include <memory>
 #include <vector>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -19,8 +20,13 @@
 #include "math/rmath.h"
 #include "camera.h"
 
+#include "gl/mesh.h"
+#include "scene/node.h"
+#include "scene/scenegraph.h"
+
 using namespace std;
 using namespace rgl;
+using namespace glm;
 
 InputHandler* InputHandler::handler;
 
@@ -34,53 +40,73 @@ void GLApp::init(int width, int height, const char* title)
     initGL();
     state = INIT;
 
+    camera.init(45.0f, width/ (float) height, 0.1f, 1000.0f);
+    camera.moveTo(0, 0, 150);
+
     // temp stuff for testing
 
-    VertexAttrib attribs[2] = {VA_POS3, VA_COLOR};
+    std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 
-    vertexArray = new VertexArray(4, 6, attribs, 2);
+    mesh->addVertex(vec3(-0.5f, 0.5f, 0.5f));
+    mesh->addVertex(vec3(-0.5f, -0.5f, 0.5f));
+    mesh->addVertex(vec3(0.5f, -0.5f, 0.5f));
+    mesh->addVertex(vec3(0.5f, 0.5f, 0.5f));
+    mesh->addVertex(vec3(-0.5f, 0.5f, -0.5f));
+    mesh->addVertex(vec3(-0.5f, -0.5f, -0.5f));
+    mesh->addVertex(vec3(0.5f, -0.5f, -0.5f));
+    mesh->addVertex(vec3(0.5f, 0.5f, -0.5f));
 
-    // vertexArray->vertices = {
-    //     -0.5f, 0.5f, 0.0f,
-    //     1, 0, 0, 1,
-    //     -0.5f,-0.5f, 0.0f,
-    //     0, 1, 0, 1,
-    //     0.5f,-0.5f, 0.0f,
-    //     0, 0, 1, 1,
-    //     0.5f, 0.5f, 0.0f,
-    //     0.5, 0.5, 0, 1
-    // };
+    mesh->addColor(vec4(-0.5f, 0.5f, 0.5f, 0.75f));
+    mesh->addColor(vec4(-0.5f, -0.5f, 0.5f, 0.75f));
+    mesh->addColor(vec4(0.5f, -0.5f, 0.5f, 0.75f));
+    mesh->addColor(vec4(0.5f, 0.5f, 0.5f, 0.75f));
+    mesh->addColor(vec4(-0.5f, 0.5f, -0.5f, 0.75f));
+    mesh->addColor(vec4(-0.5f, -0.5f, -0.5f, 0.75f));
+    mesh->addColor(vec4(0.5f, -0.5f, -0.5f, 0.75f));
+    mesh->addColor(vec4(0.5f, 0.5f, -0.5f, 0.75f));
 
-    vertexArray->vertices = {
-        -50.0f, 50.0f, 0.0f,
-        1, 0, 0, 1,
-        -50.0f,-50.0f, 0.0f,
-        0, 1, 0, 1,
-        50.0f,-50.0f, 0.0f,
-        0, 0, 1, 1,
-        50.0f, 50.0f, 0.0f,
-        5, 5, 0, 1
-    };
+    int faceF[] = {0, 1, 2, 3};
+    int faceB[] = {7, 6, 5, 4};
+    int faceL[] = {4, 5, 1, 0};
+    int faceR[] = {3, 2, 6, 7};
+    int faceU[] = {4, 0, 3, 7};
+    int faceD[] = {1, 5, 6, 2};
 
-    vertexArray->indices = {
-        0, 1, 2,
-        2, 3, 0
-    };
+    mesh->addFace(Face(4, faceF));
+    mesh->addFace(Face(4, faceB));
+    mesh->addFace(Face(4, faceL));
+    mesh->addFace(Face(4, faceR));
+    mesh->addFace(Face(4, faceU));
+    mesh->addFace(Face(4, faceD));
 
-    vertexArray->bind();
-    vertexArray->bufferData(GL_STATIC_DRAW);
-    vertexArray->unbind();
+    mesh->computeFaceNormals();
+    mesh->computeVertexNormals();
+    mesh->useColors(true);
+
+    mesh->bufferData(false, GL_STATIC_DRAW);
+
+    Model* model = new Model(sceneGraph.allocateNode(), mesh);
+    model->scale = vec3(20, 20, 20);
+    models.push_back(model);
+
+    boxNode = sceneGraph.allocateNode();
+
+    int w = 20, h = 10;
+    for (int i = -w / 2; i <= w / 2; i++)
+        for (int j = -h / 2; j <= h / 2; j++) {
+            model = new Model(sceneGraph.allocateNode(), mesh);
+            model->scale = vec3(2, 2, 2);
+            model->moveTo(i * 9, j * 9, 0);
+            sceneGraph.attachNode(model->node, boxNode);
+            models.push_back(model);
+        }
 
     string dir = "/home/ashi/src/cpp/projects/rigid/src/shaders/";
-    string vertSrc = readFile((dir + "standard.vert").c_str());
-    string fragSrc = readFile((dir + "standard.frag").c_str());
+    string vertSrc = readFile((dir + "normcol.vert").c_str());
+    string fragSrc = readFile((dir + "normcol.frag").c_str());
 
-    program.create(vertSrc, fragSrc, attribs, 2);
-    camera.init(45.0f, width/ (float) height, 0.1f, 1000.0f);
-    camera.translate(0, 0, 100);
-    program.use();
-    program.setUniformMatrix4f(U_PROJMATRIX, camera.getProjectionMatrix());
-    program.disable();
+    program.create(vertSrc, fragSrc, VAS_POSNORMCOL);
+    pipeline.watchProgram(program);
 }
 
 void GLApp::run()
@@ -93,7 +119,9 @@ void GLApp::run()
         prepare();
         glfwPollEvents();
         handleInput();
-        update();
+        updateCamera();
+        if (state != PAUSED)
+            update();
         render();
         glfwSwapBuffers(window);
         cleanUp();
@@ -129,7 +157,6 @@ void GLApp::initGlfw()
     glfwSwapInterval(1);
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void GLApp::initGLEW()
@@ -145,6 +172,9 @@ void GLApp::initGL()
 {
     glViewport(0, 0, width, height);
     glClearColor(0, 0, 0, 1);
+    glEnable(GL_DEPTH_TEST);
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void GLApp::initTime()
@@ -159,6 +189,8 @@ void GLApp::updateTime()
     prevTime = time;
     time = glfwGetTime();
     dt = time - prevTime;
+    if (state != PAUSED)
+        runningTime += dt;
 }
 
 void GLApp::updateFPS()
@@ -177,40 +209,39 @@ void GLApp::prepare()
 
 void GLApp::handleInput()
 {
-    double xp, yp;
-    glfwGetCursorPos(window, &xp, &yp);
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        if (xp != xpos) {
-            camera.rotateLocally(-R_PI * 20 * dt * (xp - xpos) / (float) width, 0, 1, 0);
+        if (xpos != cursor.x) {
+            camera.rotateLocally(-R_PI * 20 * dt * (xpos - cursor.x) / (float) width, 0, 1, 0);
         }
-        if (yp != ypos) {
-            camera.rotateLocally(-R_PI * 20 * dt * (yp - ypos) / (float) width, 1, 0, 0);
+        if (ypos != cursor.y) {
+            camera.rotateLocally(-R_PI * 20 * dt * (ypos - cursor.y) / (float) width, 1, 0, 0);
         }
-        glfwSetCursorPos(window, xp, yp);
     } else {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
-    xpos = xp;
-    ypos = yp;
+    cursor.x = xpos;
+    cursor.y = ypos;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.translateLocally(0, 10 * dt, 0);
+        camera.translateLocally(0, 20 * dt, 0);
 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.translateLocally(0, -10 * dt, 0);
+        camera.translateLocally(0, -20 * dt, 0);
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.translateLocally(-10 * dt, 0, 0);
+        camera.translateLocally(-20 * dt, 0, 0);
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.translateLocally(10 * dt, 0, 0);
+        camera.translateLocally(20 * dt, 0, 0);
 
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        camera.translateLocally(0, 0, -10 * dt);
+        camera.translateLocally(0, 0, -20 * dt);
 
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        camera.translateLocally(0, 0, 10 * dt);
+        camera.translateLocally(0, 0, 20 * dt);
 
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
         camera.rotateLocally(R_PI * dt, 0, 0, 1);
@@ -219,23 +250,34 @@ void GLApp::handleInput()
         camera.rotateLocally(-R_PI * dt, 0, 0, 1);
 }
 
-void GLApp::update()
+void GLApp::updateCamera()
 {
     camera.update();
+    pipeline.update(camera.getProjectionMatrix(), camera.getViewMatrix());
+    pipeline.updatePrograms();
+}
+
+void GLApp::update()
+{
+    boxNode->rotateLocally(R_PI/8 * dt, glm::vec3(1, 0, 0));
+    for(Model* model : models) {
+        model->rotateLocally(R_PI / 2 * dt, glm::vec3(0, 0, 1));
+        model->rotate(R_PI / 2 * dt, glm::vec3(0, 1, 0));
+        model->updateMatrices();
+    }
+    models[0]->moveTo(50 * sin(runningTime / 2), 0, 50 * cos(runningTime / 2));
+    sceneGraph.updateTransforms();
 }
 
 void GLApp::render()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     program.use();
-    program.setUniformMatrix4f(U_PROJMATRIX, camera.getProjectionMatrix());
-    program.setUniformMatrix4f(U_VIEWMATRIX, camera.getViewMatrix());
-    vertexArray->bind();
-    vertexArray->drawElements(GL_TRIANGLES);
-    vertexArray->unbind();
+    for (Model* model : models) {
+        model->render(program);
+    }
     program.disable();
 }
-
 
 void GLApp::cleanUp()
 {
@@ -254,6 +296,17 @@ void GLApp::keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
+    }
+
+    if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        if (state == RUNNING)
+            state = PAUSED;
+        else if (state == PAUSED)
+            state = RUNNING;
+    }
+
+    if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+        models[0]->mesh->bufferData(!models[0]->mesh->flatShading, GL_STATIC_DRAW);
     }
 }
 

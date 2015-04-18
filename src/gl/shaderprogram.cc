@@ -172,17 +172,17 @@ bool ShaderProgram::create(const std::string& vertSource,
     return true;
 }
 
-bool ShaderProgram::isValid()
+bool ShaderProgram::isValid() const
 {
     return validateProgram(programId);
 }
 
-void ShaderProgram::use()
+void ShaderProgram::use() const
 {
     glUseProgram(programId);
 }
 
-void ShaderProgram::disable()
+void ShaderProgram::disable() const
 {
     glUseProgram(0);
 }

@@ -7,15 +7,37 @@
 
 using namespace rgl;
 
-VertexArray::VertexArray(int vertexCapacity, int indexCapacity,
-                         const std::vector<VertexAttrib>& _attribs)
+VertexArray::VertexArray(const std::vector<VertexAttrib>& _attribs)
 {
     usingIndices = true;
     attribs = _attribs;
     initBuffers();
+    glGenBuffers(1, &iboId);
+}
+
+VertexArray::VertexArray(const VertexAttrib* _attribs, int count)
+{
+    usingIndices = true;
+    attribs.reserve(count);
+    for (int i = 0; i < count; i++) {
+        attribs.push_back(_attribs[i]);
+    }
+    initBuffers();
+    glGenBuffers(1, &iboId);
+}
+
+VertexArray::VertexArray(int vertexCapacity, int indexCapacity,
+                         const std::vector<VertexAttrib>& _attribs) : VertexArray(_attribs)
+{
     vertices.reserve(vertexCapacity * numComponents);
     indices.reserve(indexCapacity);
-    glGenBuffers(1, &iboId);
+}
+
+VertexArray::VertexArray(int vertexCapacity, int indexCapacity,
+                         const VertexAttrib* _attribs, int count) : VertexArray(_attribs, count)
+{
+    vertices.reserve(vertexCapacity * numComponents);
+    indices.reserve(indexCapacity);
 }
 
 VertexArray::VertexArray(int vertexCapacity,
@@ -25,20 +47,6 @@ VertexArray::VertexArray(int vertexCapacity,
     attribs = _attribs;
     initBuffers();
     vertices.reserve(vertexCapacity * numComponents);
-}
-
-VertexArray::VertexArray(int vertexCapacity, int indexCapacity,
-                         const VertexAttrib* _attribs, int count)
-{
-    usingIndices = true;
-    attribs.reserve(count);
-    for (int i = 0; i < count; i++) {
-        attribs.push_back(_attribs[i]);
-    }
-    initBuffers();
-    vertices.reserve(vertexCapacity * numComponents);
-    indices.reserve(indexCapacity);
-    glGenBuffers(1, &iboId);
 }
 
 VertexArray::VertexArray(int vertexCapacity,
@@ -56,7 +64,7 @@ VertexArray::VertexArray(int vertexCapacity,
 void VertexArray::bind()
 {
     glBindVertexArray(vaoId);
-    for (VertexAttrib &attrib : attribs) {
+    for (VertexAttrib& attrib : attribs) {
         glEnableVertexAttribArray(attrib.location);
     }
     if (usingIndices) {
@@ -112,6 +120,8 @@ void VertexArray::destroy()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glDeleteBuffers(1, &iboId);
     }
+
+    vaoId = 0;
 }
 
 void VertexArray::initBuffers()
@@ -129,7 +139,7 @@ void VertexArray::initBuffers()
     glGenBuffers(1, &vboId);
     glBindBuffer(GL_ARRAY_BUFFER, vboId);
 
-    int offset = 0;
+    intptr_t offset = 0;
     for (VertexAttrib &attrib : attribs) {
         glEnableVertexAttribArray(attrib.location);
         glVertexAttribPointer(attrib.location, attrib.numComponents,

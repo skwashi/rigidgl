@@ -12,7 +12,12 @@
 #include "gl/vertexattrib.h"
 #include "gl/vertexarray.h"
 #include "gl/shaderprogram.h"
+#include "gl/pipeline.h"
+#include "gl/mesh.h"
 #include "camera.h"
+#include "scene/model.h"
+#include "scene/node.h"
+#include "scene/scenegraph.h"
 
 class InputHandler
 {
@@ -98,9 +103,13 @@ protected:
     double time; // time in seconds since init
     double prevTime; // time at last frame
     double dt; // time - prevTime
+    double runningTime; // time while not paused
+
     int frameCount;
     int fps;
     double timeStamp;
+    Camera camera;
+    glm::dvec2 cursor;
 
     void initGlfw();
     void initGLEW();
@@ -110,6 +119,7 @@ protected:
     void updateFPS();
     virtual void prepare();
     virtual void handleInput();
+    virtual void updateCamera();
     virtual void update();
     virtual void render();
     virtual void cleanUp();
@@ -122,12 +132,12 @@ protected:
 
 private:
     std::string title;
+    rgl::Pipeline pipeline;
+    SceneGraph sceneGraph;
+    std::vector<Model*> models;
     // temp stuff for testing
-    rgl::VertexArray* vertexArray;
     rgl::ShaderProgram program;
-    Camera camera;
-    double xpos;
-    double ypos;
+    Node* boxNode;
 };
 
 #endif

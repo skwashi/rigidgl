@@ -2,6 +2,7 @@
  * @author Jonas Ransjö
  */
 
+#include <iostream>
 #include <vector>
 #include <glm/glm.hpp>
 
@@ -30,9 +31,9 @@ void Pipeline::update(mat4 projMatrix, mat4 viewMatrix)
     projViewMatrix = projMatrix * viewMatrix;
 }
 
-void Pipeline::watchProgram(ShaderProgram* program)
+void Pipeline::watchProgram(ShaderProgram& program)
 {
-    watchedPrograms.push_back(program);
+    watchedPrograms.push_back(&program);
 }
 
 void Pipeline::clearPrograms()
@@ -40,21 +41,21 @@ void Pipeline::clearPrograms()
     watchedPrograms.clear();
 }
 
-void Pipeline::updateMatrices(ShaderProgram* program) const
+void Pipeline::updateMatrices(ShaderProgram& program) const
 {
-    if (program->hasUniform(U_PROJMATRIX))
-        program->setUniformMatrix4f(U_PROJMATRIX, projMatrix);
-    if (program->hasUniform(U_VIEWMATRIX))
-        program->setUniformMatrix4f(U_VIEWMATRIX, viewMatrix);
-    if (program->hasUniform(U_PROJVIEWMATRIX))
-        program->setUniformMatrix4f(U_PROJVIEWMATRIX, projViewMatrix);
+    if (program.hasUniform(U_PROJMATRIX))
+        program.setUniformMatrix4f(U_PROJMATRIX, projMatrix);
+    if (program.hasUniform(U_VIEWMATRIX))
+        program.setUniformMatrix4f(U_VIEWMATRIX, viewMatrix);
+    if (program.hasUniform(U_PROJVIEWMATRIX))
+        program.setUniformMatrix4f(U_PROJVIEWMATRIX, projViewMatrix);
 }
 
 void Pipeline::updatePrograms()
 {
     for (ShaderProgram* program : watchedPrograms) {
         program->use();
-        updateMatrices(program);
+        updateMatrices(*program);
         program->disable();
     }
 }

@@ -34,9 +34,9 @@ public:
                  const std::string& fragSource,
                  const VertexAttrib* attribs, int count);
 
-    bool isValid();
-    void use();
-    void disable();
+    bool isValid() const; 
+    void use() const;
+    void disable() const;
     GLuint getId() const;
     bool hasAttrib(const std::string& name) const;
     bool hasUniform(const std::string& name) const;

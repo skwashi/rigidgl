@@ -7,6 +7,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "math/tr3.h"
 #include "math/movable3.h"
 
 class Camera : public rm::Movable3

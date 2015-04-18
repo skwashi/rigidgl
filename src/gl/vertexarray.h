@@ -18,15 +18,16 @@ public:
     std::vector<float> vertices;
     std::vector<unsigned int> indices;
 
+    VertexArray() {}
+
+    VertexArray(const std::vector<VertexAttrib>& attribs);
+    VertexArray(const VertexAttrib* attribs, int count);
     VertexArray(int vertexCapacity, int indexCapacity,
                 const std::vector<VertexAttrib>& _attribs);
-
-    VertexArray(int vertexCapacity,
-                const std::vector<VertexAttrib>& _attribs);
-
     VertexArray(int vertexCapacity, int indexCapacity,
                 const VertexAttrib* _attribs, int count);
-
+    VertexArray(int vertexCapacity,
+                const std::vector<VertexAttrib>& _attribs);
     VertexArray(int vertexCapacity,
                 const VertexAttrib* _attribs, int count);
 
@@ -43,7 +44,7 @@ public:
             bufferIndexData(usage);
     }
 
-    void draw(GLenum mode)
+    void draw(GLenum mode = GL_TRIANGLES)
     {
         glDrawArrays(mode, 0, getVertexCount());
     }
@@ -53,7 +54,7 @@ public:
         glDrawArrays(mode, 0, count);
     }
 
-    void drawElements(GLenum mode)
+    void drawElements(GLenum mode = GL_TRIANGLES)
     {
         glDrawElements(mode, getIndexCount(), GL_UNSIGNED_INT, (void*) 0);
     }
@@ -107,12 +108,17 @@ public:
 
     void destroy();
 
+    bool isInited()
+    {
+        return vaoId != 0;
+    }
+
 private:
     int numComponents;
     int stride;
-    GLuint vaoId;
-    GLuint vboId;
-    GLuint iboId;
+    GLuint vaoId = 0;
+    GLuint vboId = 0;
+    GLuint iboId = 0;
     bool usingIndices;
 
     void initBuffers();
