@@ -41,7 +41,12 @@ public:
 
     void updateMatrices();
     void updateMatrices(const glm::mat4& viewMatrix);
+    void attachProgram(rgl::ShaderProgram* program);
+    void render() const;
     void render(rgl::ShaderProgram& program) const;
+
+private:
+    rgl::ShaderProgram* program = NULL;
 };
 
 

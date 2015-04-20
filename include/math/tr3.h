@@ -114,11 +114,26 @@ struct Tr3
         // q = rotate(q, angle, axis);
     }
 
+    void addRotation(const glm::vec3& rot)
+    {
+        float angle = length(rot);
+        if (!isZero(angle)) {
+            q = glm::angleAxis(angle, rot / angle) * q;
+            normalize();
+        }
+        // q = rotate(q, angle, axis);
+    }
+
     void addRotation(float angle, float x, float y, float z)
     {
         q = glm::angleAxis(angle, glm::vec3(x, y, z)) * q;
         normalize();
         //q = rotate(q, angle, glm::vec3(x, y, z));
+    }
+
+    void addRotation(float x, float y, float z)
+    {
+        addRotation(glm::vec3(x, y ,z));
     }
 
     void addLocalRotation(const glm::quat& _q)
@@ -132,9 +147,19 @@ struct Tr3
         addRotation(angle, q * axis);
     }
 
+    void addLocalRotation(const glm::vec3& rot)
+    {
+        addRotation(q * rot);
+    }
+
     void addLocalRotation(float angle, float x, float y, float z)
     {
         addRotation(angle, q * glm::vec3(x, y, z));
+    }
+
+    void addLocalRotation(float x, float y, float z)
+    {
+        addRotation(q * glm::vec3(x, y, z));
     }
 
     void addTranslation(const glm::vec3& _p)

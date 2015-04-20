@@ -3,20 +3,14 @@
  */
 
 #include <iostream>
-#include <fstream>
-#include <streambuf>
 #include <stdlib.h>
 #include <memory>
-#include <vector>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 #include "glapp.h"
 #include "gl/vertexattrib.h"
-#include "gl/vertexarray.h"
-#include "gl/glutils.h"
 #include "math/rmath.h"
 #include "camera.h"
 
@@ -39,74 +33,6 @@ void GLApp::init(int width, int height, const char* title)
     initGLEW();
     initGL();
     state = INIT;
-
-    camera.init(45.0f, width/ (float) height, 0.1f, 1000.0f);
-    camera.moveTo(0, 0, 150);
-
-    // temp stuff for testing
-
-    std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
-
-    mesh->addVertex(vec3(-0.5f, 0.5f, 0.5f));
-    mesh->addVertex(vec3(-0.5f, -0.5f, 0.5f));
-    mesh->addVertex(vec3(0.5f, -0.5f, 0.5f));
-    mesh->addVertex(vec3(0.5f, 0.5f, 0.5f));
-    mesh->addVertex(vec3(-0.5f, 0.5f, -0.5f));
-    mesh->addVertex(vec3(-0.5f, -0.5f, -0.5f));
-    mesh->addVertex(vec3(0.5f, -0.5f, -0.5f));
-    mesh->addVertex(vec3(0.5f, 0.5f, -0.5f));
-
-    mesh->addColor(vec4(-0.5f, 0.5f, 0.5f, 0.75f));
-    mesh->addColor(vec4(-0.5f, -0.5f, 0.5f, 0.75f));
-    mesh->addColor(vec4(0.5f, -0.5f, 0.5f, 0.75f));
-    mesh->addColor(vec4(0.5f, 0.5f, 0.5f, 0.75f));
-    mesh->addColor(vec4(-0.5f, 0.5f, -0.5f, 0.75f));
-    mesh->addColor(vec4(-0.5f, -0.5f, -0.5f, 0.75f));
-    mesh->addColor(vec4(0.5f, -0.5f, -0.5f, 0.75f));
-    mesh->addColor(vec4(0.5f, 0.5f, -0.5f, 0.75f));
-
-    int faceF[] = {0, 1, 2, 3};
-    int faceB[] = {7, 6, 5, 4};
-    int faceL[] = {4, 5, 1, 0};
-    int faceR[] = {3, 2, 6, 7};
-    int faceU[] = {4, 0, 3, 7};
-    int faceD[] = {1, 5, 6, 2};
-
-    mesh->addFace(Face(4, faceF));
-    mesh->addFace(Face(4, faceB));
-    mesh->addFace(Face(4, faceL));
-    mesh->addFace(Face(4, faceR));
-    mesh->addFace(Face(4, faceU));
-    mesh->addFace(Face(4, faceD));
-
-    mesh->computeFaceNormals();
-    mesh->computeVertexNormals();
-    mesh->useColors(true);
-
-    mesh->bufferData(false, GL_STATIC_DRAW);
-
-    Model* model = new Model(sceneGraph.allocateNode(), mesh);
-    model->scale = vec3(20, 20, 20);
-    models.push_back(model);
-
-    boxNode = sceneGraph.allocateNode();
-
-    int w = 20, h = 10;
-    for (int i = -w / 2; i <= w / 2; i++)
-        for (int j = -h / 2; j <= h / 2; j++) {
-            model = new Model(sceneGraph.allocateNode(), mesh);
-            model->scale = vec3(2, 2, 2);
-            model->moveTo(i * 9, j * 9, 0);
-            sceneGraph.attachNode(model->node, boxNode);
-            models.push_back(model);
-        }
-
-    string dir = "/home/ashi/src/cpp/projects/rigid/src/shaders/";
-    string vertSrc = readFile((dir + "normcol.vert").c_str());
-    string fragSrc = readFile((dir + "normcol.frag").c_str());
-
-    program.create(vertSrc, fragSrc, VAS_POSNORMCOL);
-    pipeline.watchProgram(program);
 }
 
 void GLApp::run()
@@ -199,6 +125,7 @@ void GLApp::updateFPS()
         fps = frameCount;
         frameCount = 0;
         timeStamp = time;
+        std::cout << "FPS: " << fps << std::endl;
     }
     frameCount++;
 }
@@ -259,24 +186,12 @@ void GLApp::updateCamera()
 
 void GLApp::update()
 {
-    boxNode->rotateLocally(R_PI/8 * dt, glm::vec3(1, 0, 0));
-    for(Model* model : models) {
-        model->rotateLocally(R_PI / 2 * dt, glm::vec3(0, 0, 1));
-        model->rotate(R_PI / 2 * dt, glm::vec3(0, 1, 0));
-        model->updateMatrices();
-    }
-    models[0]->moveTo(50 * sin(runningTime / 2), 0, 50 * cos(runningTime / 2));
-    sceneGraph.updateTransforms();
+    sceneGraph.updateTransforms(dt);
+    scene.updateMatrices();
 }
 
 void GLApp::render()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    program.use();
-    for (Model* model : models) {
-        model->render(program);
-    }
-    program.disable();
 }
 
 void GLApp::cleanUp()
@@ -303,10 +218,6 @@ void GLApp::keyCallback(GLFWwindow* window, int key, int scancode, int action, i
             state = PAUSED;
         else if (state == PAUSED)
             state = RUNNING;
-    }
-
-    if (key == GLFW_KEY_O && action == GLFW_PRESS) {
-        models[0]->mesh->bufferData(!models[0]->mesh->flatShading, GL_STATIC_DRAW);
     }
 }
 

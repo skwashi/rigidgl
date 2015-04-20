@@ -19,7 +19,7 @@ using namespace rgl;
 void Model::updateMatrices()
 {
     modelMatrix = node->worldTransform.toMat4();
-    normalMatrix = glm::mat3(glm::transpose(glm::inverse(modelMatrix)));
+    normalMatrix = glm::mat3(modelMatrix);
     modelMatrix = glm::scale(modelMatrix, scale);
 }
 
@@ -27,6 +27,17 @@ void Model::updateMatrices(const glm::mat4& viewMatrix)
 {
     updateMatrices();
     modelViewMatrix = viewMatrix * modelMatrix;
+}
+
+void Model::attachProgram(rgl::ShaderProgram* program)
+{
+    this->program = program;
+}
+
+void Model::render() const
+{
+    if (program != NULL)
+        render(*program);
 }
 
 void Model::render(ShaderProgram& program) const

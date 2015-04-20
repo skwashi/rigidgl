@@ -81,6 +81,12 @@ void SceneGraph::attachNodeInWorld(Node* node, Node* parent)
 
 void SceneGraph::updateTransforms()
 {
-    root->worldTransform = root->getTransform();
+    root->updateWorldTransform();
     root->updateChildTransforms();
+}
+
+void SceneGraph::updateTransforms(float dt)
+{
+    root->updateTransforms(dt);
+    root->updateChildTransforms(dt);
 }

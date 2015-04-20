@@ -5,19 +5,13 @@
 #ifndef GLAPP_H
 #define GLAPP_H
 
-#include <stdlib.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "gl/vertexattrib.h"
-#include "gl/vertexarray.h"
-#include "gl/shaderprogram.h"
 #include "gl/pipeline.h"
-#include "gl/mesh.h"
 #include "camera.h"
-#include "scene/model.h"
-#include "scene/node.h"
 #include "scene/scenegraph.h"
+#include "scene/scene.h"
 
 class InputHandler
 {
@@ -98,7 +92,9 @@ protected:
     State state;
     int width;
     int height;
+    std::string title;
     GLFWwindow* window;
+    glm::dvec2 cursor;
 
     double time; // time in seconds since init
     double prevTime; // time at last frame
@@ -108,8 +104,11 @@ protected:
     int frameCount;
     int fps;
     double timeStamp;
+
     Camera camera;
-    glm::dvec2 cursor;
+    rgl::Pipeline pipeline;
+    SceneGraph sceneGraph;
+    Scene scene;
 
     void initGlfw();
     void initGLEW();
@@ -130,14 +129,7 @@ protected:
     virtual void resizeCallback(GLFWwindow* window, int width, int height);
     virtual void cursorCallback(GLFWwindow* window, double xpos, double ypos);
 
-private:
-    std::string title;
-    rgl::Pipeline pipeline;
-    SceneGraph sceneGraph;
-    std::vector<Model*> models;
-    // temp stuff for testing
-    rgl::ShaderProgram program;
-    Node* boxNode;
+
 };
 
 #endif

@@ -74,6 +74,16 @@ public:
         getTransform().addRotation(angle, x, y, z);
     }
 
+    void rotate(const glm::vec3& rot)
+    {
+        getTransform().addRotation(rot);
+    }
+
+    void rotate(float x, float y, float z)
+    {
+        getTransform().addRotation(x, y, z);
+    }
+
     void rotateLocally(float angle, const glm::vec3& axis)
     {
         getTransform().addLocalRotation(angle, axis);
@@ -82,6 +92,16 @@ public:
     void rotateLocally(float angle, float x, float y, float z)
     {
         getTransform().addLocalRotation(angle, x, y, z);
+    }
+
+    void rotateLocally(const glm::vec3& rot)
+    {
+        getTransform().addLocalRotation(rot);
+    }
+
+    void rotateLocally(float x, float y, float z)
+    {
+        getTransform().addLocalRotation(x, y, z);
     }
 
     void rotateAround(const glm::vec3& pivot, float angle, const glm::vec3& axis)

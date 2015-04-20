@@ -16,11 +16,24 @@ struct Node : public rm::Movable3
     Node* parent = NULL;
     std::vector<Node*> children;
 
+    glm::vec3 v;
+    glm::vec3 w;
+
     rm::Tr3 worldTransform;
 
     void updateWorldTransform()
     {
-        worldTransform = parent->worldTransform * getTransform();
+        if (parent != NULL)
+            worldTransform = parent->worldTransform * getTransform();
+        else
+            worldTransform = getTransform();
+    }
+
+    void updateTransforms(float dt)
+    {
+        getTransform().addTranslation(v * dt);
+        getTransform().addRotation(w * dt);
+        updateWorldTransform();
     }
 
     void updateChildTransforms()
@@ -28,6 +41,14 @@ struct Node : public rm::Movable3
         for (Node* node : children) {
             node->updateWorldTransform();
             node->updateChildTransforms();
+        }
+    }
+
+    void updateChildTransforms(float dt)
+    {
+        for (Node* node : children) {
+            node->updateTransforms(dt);
+            node->updateChildTransforms(dt);
         }
     }
 

@@ -26,6 +26,7 @@ public:
     void attachNode(Node* node, Node* parent);
     void attachNodeInWorld(Node* node, Node* parent);
     void updateTransforms();
+    void updateTransforms(float dt);
 
     virtual const rm::Tr3& getTransform() const
     {
