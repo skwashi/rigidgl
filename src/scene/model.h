@@ -5,7 +5,6 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <memory>
 #include <glm/glm.hpp>
 
 #include "math/tr3.h"
@@ -14,16 +13,26 @@
 #include "../gl/rgl.h"
 #include "../gl/shaderprogram.h"
 #include "../gl/mesh.h"
-
+#include "../gl/gltexture.h"
 
 class Model : public rm::Movable3
 {
 public:
+    Model(rgl::Mesh* mesh) : mesh(mesh) {}
     Model(Node* node,
-          const std::shared_ptr<rgl::Mesh>& mesh) : node(node), mesh(mesh) {}
+          rgl::Mesh* mesh)
+        : node(node), mesh(mesh) {}
+    Model(rgl::Mesh* mesh,
+          rgl::GLTexture* texture)
+        : mesh(mesh), texture(texture) {}
+    Model(Node* node,
+          rgl::Mesh* mesh,
+          rgl::GLTexture* texture)
+        : node(node), mesh(mesh), texture(texture) {}
 
-    Node* node;
-    std::shared_ptr<rgl::Mesh> mesh;
+    Node* node = NULL;
+    rgl::Mesh* mesh = NULL;
+    rgl::GLTexture* texture = NULL;
     glm::vec3 scale = glm::vec3(1, 1, 1);
     glm::mat4 modelMatrix;
     glm::mat4 modelViewMatrix;
@@ -31,17 +40,24 @@ public:
 
     virtual const rm::Tr3& getTransform() const
     {
-        return node->getTransform();
+        if (node)
+            return node->getTransform();
+        else
+            return Movable3::getTransform();
     }
 
     virtual rm::Tr3& getTransform()
     {
-        return node->getTransform();
+        if (node)
+            return node->getTransform();
+        else
+            return Movable3::getTransform();
     }
 
+    void setTexture(rgl::GLTexture* texture);
+    void attachProgram(rgl::ShaderProgram* program);
     void updateMatrices();
     void updateMatrices(const glm::mat4& viewMatrix);
-    void attachProgram(rgl::ShaderProgram* program);
     void render() const;
     void render(rgl::ShaderProgram& program) const;
 

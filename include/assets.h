@@ -9,10 +9,11 @@
 
 namespace assets {
 
-const std::string DIR = "assets";
-const std::string SHADER_DIR = DIR + "/shaders";
-const std::string TEXTURE_DIR = DIR + "/textures";
-const std::string MODEL_DIR = DIR + "/models";
+const std::string DIR = "assets/";
+const std::string SHADER_DIR = DIR + "shaders/";
+const std::string TEXTURE_DIR = DIR + "textures/";
+const std::string CUBEMAP_DIR = DIR + "cubemaps/";
+const std::string MODEL_DIR = DIR + "models/";
 
 }
 

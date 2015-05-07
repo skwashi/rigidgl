@@ -15,80 +15,77 @@ class VertexArray
 {
 public:
     std::vector<VertexAttrib> attribs;
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
 
     VertexArray() {}
 
     VertexArray(const std::vector<VertexAttrib>& attribs);
-    VertexArray(const VertexAttrib* attribs, int count);
-    VertexArray(int vertexCapacity, int indexCapacity,
-                const std::vector<VertexAttrib>& _attribs);
-    VertexArray(int vertexCapacity, int indexCapacity,
-                const VertexAttrib* _attribs, int count);
-    VertexArray(int vertexCapacity,
-                const std::vector<VertexAttrib>& _attribs);
-    VertexArray(int vertexCapacity,
-                const VertexAttrib* _attribs, int count);
 
-    void bind();
-    void unbind();
-    void bufferVertexData(GLenum usage);
-    void bufferVertexData(const float* data, unsigned int count, GLenum usage);
-    void bufferIndexData(GLenum usage);
-    void bufferIndexData(const int* data, unsigned int count, GLenum usage);
-    void bufferData(GLenum usage)
-    {
-        bufferVertexData(usage);
-        if (usingIndices)
-            bufferIndexData(usage);
+    VertexArray(const VertexAttrib* attribs, uint count);
+
+    ~VertexArray();
+
+    void init(const std::vector<VertexAttrib>& attribs);
+
+    void init(const VertexAttrib* attribs, uint count);
+
+    void bind() const;
+
+    void unbind() const;
+
+    void useIndices(bool flag) {
+        usingIndices = flag;
     }
 
-    void draw(GLenum mode = GL_TRIANGLES)
+    void bufferVertexData(const float* data, unsigned int count, GLenum usage = GL_STATIC_DRAW);
+
+    void bufferIndexData(const uint* data, unsigned int count, GLenum usage = GL_STATIC_DRAW);
+
+    void bufferData(const float* vertexData, uint vcount,
+                    const uint* indexData, uint icount,
+                    GLenum usage = GL_STATIC_DRAW)
+    {
+        bufferVertexData(vertexData, vcount, usage);
+        bufferIndexData(indexData, icount, usage);
+    }
+
+    void drawArrays(GLenum mode = GL_TRIANGLES) const
     {
         glDrawArrays(mode, 0, getVertexCount());
     }
 
-    void draw(GLenum mode, unsigned int count)
+    void drawArrays(uint count, GLenum mode) const
     {
         glDrawArrays(mode, 0, count);
     }
 
-    void drawElements(GLenum mode = GL_TRIANGLES)
+    void drawArrays(uint start, uint count, GLenum mode) const
+    {
+        glDrawArrays(mode, start, count);
+    }
+
+    void drawElements(GLenum mode = GL_TRIANGLES) const
     {
         glDrawElements(mode, getIndexCount(), GL_UNSIGNED_INT, (void*) 0);
     }
 
-    void drawElements(GLenum mode, unsigned int count)
+    void drawElements(uint count, GLenum mode) const
     {
-        glDrawElements(mode, count, GL_UNSIGNED_INT, (void*) 0);
+        glDrawElements(mode, getIndexCount(), GL_UNSIGNED_INT, (void*) 0);
     }
 
-    void clearVertices()
+    void drawElements(uint start, uint count, GLenum mode) const
     {
-        vertices.clear();
-    }
-
-    void clearIndices()
-    {
-        indices.clear();
-    }
-
-    void clear()
-    {
-        clearVertices();
-        if (usingIndices)
-            clearIndices();
+        glDrawElements(mode, count, GL_UNSIGNED_INT, (void*) (start * sizeof(GLuint)));
     }
 
     int getVertexCount() const
     {
-        return vertices.size() / numComponents;
+        return vcount;
     }
 
     int getIndexCount() const
     {
-        return indices.size();
+        return icount;
     }
 
     int getNumComponents() const
@@ -101,17 +98,17 @@ public:
         return stride;
     }
 
-    bool isUsingIndices()
+    bool isUsingIndices() const
     {
         return usingIndices;
     }
 
-    void destroy();
-
-    bool isInited()
+    bool isInited() const
     {
         return vaoId != 0;
     }
+
+    void destroy();
 
 private:
     int numComponents;
@@ -119,7 +116,9 @@ private:
     GLuint vaoId = 0;
     GLuint vboId = 0;
     GLuint iboId = 0;
-    bool usingIndices;
+    bool usingIndices = true;
+    uint vcount = 0;
+    uint icount = 0;
 
     void initBuffers();
 };

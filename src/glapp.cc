@@ -7,15 +7,16 @@
 #include <memory>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
 #include <glm/glm.hpp>
+#include <FreeImage.h>
+
+#include "assets.h"
 #include "glapp.h"
 #include "gl/vertexattrib.h"
 #include "math/rmath.h"
 #include "camera.h"
+#include "rutils.h"
 
-#include "gl/mesh.h"
-#include "scene/node.h"
 #include "scene/scenegraph.h"
 
 using namespace std;
@@ -32,6 +33,7 @@ void GLApp::init(int width, int height, const char* title)
     initGlfw();
     initGLEW();
     initGL();
+    FreeImage_Initialise();
     state = INIT;
 }
 
@@ -125,7 +127,6 @@ void GLApp::updateFPS()
         fps = frameCount;
         frameCount = 0;
         timeStamp = time;
-        std::cout << "FPS: " << fps << std::endl;
     }
     frameCount++;
 }
@@ -192,6 +193,8 @@ void GLApp::update()
 
 void GLApp::render()
 {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    scene.render();
 }
 
 void GLApp::cleanUp()
@@ -200,6 +203,7 @@ void GLApp::cleanUp()
 
 void GLApp::destroy()
 {
+    FreeImage_DeInitialise();
 }
 
 void GLApp::errorCallback(int error, const char* desc)
@@ -231,4 +235,31 @@ void GLApp::resizeCallback(GLFWwindow* window, int width, int height)
 
 void GLApp::cursorCallback(GLFWwindow* window, double xpos, double ypos)
 {
+}
+
+rgl::ShaderProgram* GLApp::createShader(const std::string& shaderName,
+                                        const vector<VertexAttrib>& attribs)
+{
+    return createShader(shaderName + ".vert", shaderName + ".frag",
+                        attribs);
+}
+
+rgl::ShaderProgram* GLApp::createShader(const std::string& vertName,
+                                        const std::string& fragName,
+                                        const vector<VertexAttrib>& attribs)
+{
+    string vertSrc = rutils::readFile(
+        assets::SHADER_DIR + vertName);
+    string fragSrc = rutils::readFile(
+        assets::SHADER_DIR + fragName);
+
+    ShaderProgram* program = new ShaderProgram;
+    bool success = program->create(vertSrc, fragSrc, attribs);
+
+    if (success) {
+        return program;
+    } else {
+        delete program;
+        return NULL;
+    }
 }

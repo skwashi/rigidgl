@@ -8,6 +8,12 @@
 ** DONE VertexArray
    CLOSED: [2015-04-08 ons 01:13]
 ** TODO Mesh
+*** TODO Load obj
 ** TODO Models
 ** TODO Lighting
-   
+** DONE Texture
+   CLOSED: [2015-04-24 fre 18:45]
+** DONE CubeMap
+   CLOSED: [2015-04-24 fre 18:45]
+** TODO SkyBox   
+** TODO Image loading

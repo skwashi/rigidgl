@@ -228,29 +228,24 @@ struct Tr3
 
     /* Vector multiplication */
 
-    glm::vec3 mult(const glm::vec3& v)
+    glm::vec3 mult(const glm::vec3& v) const
     {
         return q * v + p;
     }
 
-    glm::vec3 multI(const glm::vec3& v)
+    glm::vec3 multI(const glm::vec3& v) const
     {
         return (v - p) * q;
     }
 
-    glm::vec3 multV(const glm::vec3& v)
+    glm::vec3 multV(const glm::vec3& v) const
     {
         return q * v;
     }
 
-    glm::vec3 multIV(const glm::vec3& v)
+    glm::vec3 multIV(const glm::vec3& v) const
     {
         return v * q;
-    }
-
-    glm::vec3 operator *(const glm::vec3& v)
-    {
-        return q * v + p;
     }
 
     /* Matrix representation */

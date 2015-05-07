@@ -18,13 +18,13 @@ void Pipeline::update()
     projViewMatrix = projMatrix * viewMatrix;
 }
 
-void Pipeline::update(mat4 viewMatrix)
+void Pipeline::update(const mat4& viewMatrix)
 {
     this->viewMatrix = viewMatrix;
     projViewMatrix = projMatrix * viewMatrix;
 }
 
-void Pipeline::update(mat4 projMatrix, mat4 viewMatrix)
+void Pipeline::update(const mat4& projMatrix, const mat4& viewMatrix)
 {
     this->projMatrix = projMatrix;
     this->viewMatrix = viewMatrix;
@@ -34,6 +34,11 @@ void Pipeline::update(mat4 projMatrix, mat4 viewMatrix)
 void Pipeline::watchProgram(ShaderProgram& program)
 {
     watchedPrograms.push_back(&program);
+}
+
+void Pipeline::watchProgram(ShaderProgram* program)
+{
+    watchedPrograms.push_back(program);
 }
 
 void Pipeline::clearPrograms()
@@ -51,7 +56,12 @@ void Pipeline::updateMatrices(ShaderProgram& program) const
         program.setUniformMatrix4f(U_PROJVIEWMATRIX, projViewMatrix);
 }
 
-void Pipeline::updatePrograms()
+void Pipeline::updateMatrices(ShaderProgram* program) const
+{
+    updateMatrices(*program);
+}
+
+void Pipeline::updatePrograms() const
 {
     for (ShaderProgram* program : watchedPrograms) {
         program->use();

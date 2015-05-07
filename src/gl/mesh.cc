@@ -71,6 +71,41 @@ void Mesh::addFaces(const Face* fs, int count)
         faces.push_back(fs[i]);
 }
 
+void Mesh::clearVertices()
+{
+    vertices.clear();
+}
+
+void Mesh::clearNormals()
+{
+    faceNormals.clear();
+    normals.clear();
+}
+
+void Mesh::clearTexCoords()
+{
+    texCoords.clear();
+}
+
+void Mesh::clearColors()
+{
+    colors.clear();
+}
+
+void Mesh::clearFaces()
+{
+    faces.clear();
+}
+
+void Mesh::clear()
+{
+    clearVertices();
+    clearNormals();
+    clearTexCoords();
+    clearColors();
+    clearFaces();
+}
+
 void Mesh::computeFaceNormals()
 {
     faceNormals.clear();
@@ -110,31 +145,30 @@ void Mesh::computeVertexNormals()
         normals[i] = normalize(normals[i]);
 }
 
-void Mesh::bufferData(GLenum mode)
+void Mesh::bufferData(GLenum usage)
 {
-    if (!vertexArray.isInited()) {
-        initVertexArray();
+    if (!vertexBuffer.isInited()) {
+        initVertexBuffer();
     } else
-        vertexArray.clear();
+        vertexBuffer.clear();
+
+    if (normals.size() == 0)
+        computeVertexNormals();
 
     assert(vertices.size() == normals.size());
 
     for (int i = 0, count = vertices.size(); i < count; i++) {
         float* vptr = value_ptr(vertices[i]);
-        vertexArray.vertices.insert(vertexArray.vertices.end(),
-                                    vptr, vptr + 3);
+        vertexBuffer.pushVertices(vptr, 3);
         float* nptr = value_ptr(normals[i]);
-        vertexArray.vertices.insert(vertexArray.vertices.end(),
-                                    nptr, nptr + 3);
-        if (isTextured()) {
+        vertexBuffer.pushVertices(nptr, 3);
+        if (usingTextures()) {
             float* tptr = value_ptr(texCoords[i]);
-            vertexArray.vertices.insert(vertexArray.vertices.end(),
-                                        tptr, tptr + 2);
+            vertexBuffer.pushVertices(tptr, 2);
         }
-        if (isColored()) {
+        if (usingColors()) {
             float* cptr = value_ptr(colors[i]);
-            vertexArray.vertices.insert(vertexArray.vertices.end(),
-                                        cptr, cptr + 4);
+            vertexBuffer.pushVertices(cptr, 4);
         }
     }
 
@@ -142,33 +176,30 @@ void Mesh::bufferData(GLenum mode)
         int count = face.count;
         int start = face.vs[0];
         for (int i = 1; i < count - 1; i++) {
-            vertexArray.indices.push_back(start);
-            vertexArray.indices.push_back(face.vs[i]);
-            vertexArray.indices.push_back(face.vs[i+1]);
+            vertexBuffer.addTriangle(start, face.vs[i], face.vs[i+1]);
         }
     }
 
-    vertexArray.bind();
-    vertexArray.bufferData(mode);
-    vertexArray.unbind();
+    vertexBuffer.bind();
+    vertexBuffer.bufferData(usage);
 
     flatShading = false;
 }
 
-void Mesh::bufferData(bool flat, GLenum mode)
+void Mesh::bufferData(bool flat, GLenum usage)
 {
     if (flat == false) {
-        bufferData(mode);
+        bufferData(usage);
         return;
     }
 
     if (faceNormals.size() == 0)
         computeFaceNormals();
 
-    if (!vertexArray.isInited())
-        initVertexArray();
+    if (!vertexBuffer.isInited())
+        initVertexBuffer();
     else
-        vertexArray.clear();
+        vertexBuffer.clear();
 
     int vertexCount = 0;
 
@@ -178,51 +209,99 @@ void Mesh::bufferData(bool flat, GLenum mode)
         for (int j = 0; j < face.count; j++) {
             int idx = face.vs[j];
             float* vptr = value_ptr(vertices[idx]);
-            vertexArray.vertices.insert(vertexArray.vertices.end(),
-                                        vptr, vptr + 3);
-            vertexArray.vertices.insert(vertexArray.vertices.end(),
-                                        nptr, nptr + 3);
-            if (isTextured()) {
+            vertexBuffer.pushVertices(vptr, 3);
+            vertexBuffer.pushVertices(nptr, 3);
+            if (usingTextures()) {
                 float* tptr = value_ptr(texCoords[idx]);
-                vertexArray.vertices.insert(vertexArray.vertices.end(),
-                                            tptr, tptr + 2);
+                vertexBuffer.pushVertices(tptr, 2);
             }
-            if (isColored()) {
+            if (usingColors()) {
                 float* cptr = value_ptr(colors[idx]);
-                vertexArray.vertices.insert(vertexArray.vertices.end(),
-                                            cptr, cptr + 4);
+                vertexBuffer.pushVertices(cptr, 4);
             }
         }
         for (int j = 1; j < face.count - 1; j++) {
-            vertexArray.indices.push_back(vertexCount);
-            vertexArray.indices.push_back(vertexCount + j);
-            vertexArray.indices.push_back(vertexCount + j + 1);
+            vertexBuffer.addTriangle(vertexCount, vertexCount + j, vertexCount + j + 1);
         }
         vertexCount += face.count;
     }
 
-    vertexArray.bind();
-    vertexArray.bufferData(mode);
-    vertexArray.unbind();
+    vertexBuffer.bind();
+    vertexBuffer.bufferData(usage);
 
     flatShading = true;
 }
 
-void Mesh::render(GLenum mode)
+void Mesh::bufferFaceData(GLenum usage)
 {
-    vertexArray.bind();
-    vertexArray.drawElements(mode);
-    vertexArray.unbind();
+    bufferFaceData(false, usage);
 }
 
-void Mesh::initVertexArray() {
-    if (isTextured())
-        if (isColored())
-            vertexArray = VertexArray(VAS_POSNORMTEXCOL);
-        else
-            vertexArray = VertexArray(VAS_POSNORMTEX);
-    else if (isColored())
-        vertexArray = VertexArray(VAS_POSNORMCOL);
-    else
-        vertexArray = VertexArray(VAS_POSNORM);
+void Mesh::bufferFaceData(bool flat, GLenum usage)
+{
+    if (!vertexBuffer.isInited()) {
+        initVertexBuffer();
+    } else
+        vertexBuffer.clear();
+
+    assert(vertices.size() == normals.size());
+
+    int vertexCount = 0;
+
+    for (int i = 0, fcount = faces.size(); i < fcount; i++) {
+        Face face = faces[i];
+
+        for (int j = 0; j < face.count; j++) {
+            int v_j = face[j];
+
+            float* vptr = value_ptr(vertices[v_j]);
+            float* nptr = flat ?
+                value_ptr(faceNormals[i]) :
+                value_ptr(normals[v_j]);
+
+            vertexBuffer.pushVertices(vptr, 3);
+            vertexBuffer.pushVertices(nptr, 3);
+            if (usingTextures()) {
+                int t_j = face.ts ? face.ts[j] : v_j;
+                float* tptr = value_ptr(texCoords[t_j]);
+                vertexBuffer.pushVertices(tptr, 2);
+            }
+
+            if (usingColors()) {
+                int c_j = face.cs ? face.cs[j] : v_j;
+                float* cptr = value_ptr(colors[c_j]);
+                vertexBuffer.pushVertices(cptr, 4);
+            }
+
+            for (int j = 1; j < face.count - 1; j++) {
+                vertexBuffer.addTriangle(vertexCount, vertexCount + j, vertexCount + j + 1);
+            }
+            vertexCount += face.count;
+        }
+    }
+
+    vertexBuffer.bind();
+    vertexBuffer.bufferData(usage);
+
+    flatShading = flat;
 }
+
+
+void Mesh::render(GLenum mode)
+{
+    vertexBuffer.render();
+}
+
+void Mesh::initVertexBuffer() {
+    if (usingTextures())
+        if (usingColors())
+            vertexBuffer.init(VAS_POSNORMTEXCOL);
+        else
+            vertexBuffer.init(VAS_POSNORMTEX);
+    else if (usingColors())
+        vertexBuffer.init(VAS_POSNORMCOL);
+    else
+        vertexBuffer.init(VAS_POSNORM);
+}
+
+

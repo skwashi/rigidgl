@@ -161,22 +161,22 @@ public:
 
     /* Coordinate System */
 
-    glm::vec3 localToWorld(const glm::vec3& p)
+    glm::vec3 localToWorld(const glm::vec3& p) const
     {
         return getTransform() * p;
     }
 
-    glm::vec3 worldToLocal(const glm::vec3& p)
+    glm::vec3 worldToLocal(const glm::vec3& p) const
     {
         return getTransform().multI(p);
     }
 
-    glm::vec3 localToWorldV(const glm::vec3& v)
+    glm::vec3 localToWorldV(const glm::vec3& v) const
     {
         return getTransform().multV(v);
     }
 
-    glm::vec3 worldToLocalV(const glm::vec3& v)
+    glm::vec3 worldToLocalV(const glm::vec3& v) const
     {
         return getTransform().multIV(v);
     }

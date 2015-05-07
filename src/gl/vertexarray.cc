@@ -10,61 +10,43 @@ using namespace rgl;
 VertexArray::VertexArray(const std::vector<VertexAttrib>& _attribs)
 {
     usingIndices = true;
-    attribs = _attribs;
-    initBuffers();
-    glGenBuffers(1, &iboId);
+    init(_attribs);
 }
 
-VertexArray::VertexArray(const VertexAttrib* _attribs, int count)
+VertexArray::VertexArray(const VertexAttrib* _attribs, uint count)
 {
     usingIndices = true;
-    attribs.reserve(count);
-    for (int i = 0; i < count; i++) {
-        attribs.push_back(_attribs[i]);
-    }
-    initBuffers();
-    glGenBuffers(1, &iboId);
+    init(_attribs, count);
 }
 
-VertexArray::VertexArray(int vertexCapacity, int indexCapacity,
-                         const std::vector<VertexAttrib>& _attribs) : VertexArray(_attribs)
+VertexArray::~VertexArray()
 {
-    vertices.reserve(vertexCapacity * numComponents);
-    indices.reserve(indexCapacity);
+    destroy();
 }
 
-VertexArray::VertexArray(int vertexCapacity, int indexCapacity,
-                         const VertexAttrib* _attribs, int count) : VertexArray(_attribs, count)
+void VertexArray::init(const std::vector<VertexAttrib>& _attribs)
 {
-    vertices.reserve(vertexCapacity * numComponents);
-    indices.reserve(indexCapacity);
-}
-
-VertexArray::VertexArray(int vertexCapacity,
-                         const std::vector<VertexAttrib>& _attribs)
-{
-    usingIndices = false;
     attribs = _attribs;
     initBuffers();
-    vertices.reserve(vertexCapacity * numComponents);
+    if (usingIndices)
+        glGenBuffers(1, &iboId);
 }
 
-VertexArray::VertexArray(int vertexCapacity,
-                         const VertexAttrib* _attribs, int count)
+void VertexArray::init(const VertexAttrib* _attribs, uint count)
 {
-    usingIndices = false;
     attribs.reserve(count);
-    for (int i = 0; i < count; i++) {
+    for (uint i = 0; i < count; i++) {
         attribs.push_back(_attribs[i]);
     }
     initBuffers();
-    vertices.reserve(vertexCapacity * numComponents);
+    if (usingIndices)
+        glGenBuffers(1, &iboId);
 }
 
-void VertexArray::bind()
+void VertexArray::bind() const
 {
     glBindVertexArray(vaoId);
-    for (VertexAttrib& attrib : attribs) {
+    for (const VertexAttrib& attrib : attribs) {
         glEnableVertexAttribArray(attrib.location);
     }
     if (usingIndices) {
@@ -72,7 +54,7 @@ void VertexArray::bind()
     }
 }
 
-void VertexArray::unbind()
+void VertexArray::unbind() const
 {
     // for (VertexAttrib &attrib : attribs) {
     //     glDisableVertexAttribArray(attrib.location);
@@ -83,44 +65,39 @@ void VertexArray::unbind()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void VertexArray::bufferVertexData(GLenum usage)
-{
-    glBindBuffer(GL_ARRAY_BUFFER, vboId);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float),
-                 &vertices[0], usage);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-void VertexArray::bufferVertexData(const float* data, unsigned int count, GLenum usage)
+void VertexArray::bufferVertexData(const float* data, uint count, GLenum usage)
 {
     glBindBuffer(GL_ARRAY_BUFFER, vboId);
     glBufferData(GL_ARRAY_BUFFER, count * sizeof(float), data, usage);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    vcount = count / numComponents;
 }
 
-
-void VertexArray::bufferIndexData(GLenum usage)
-{
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], usage);
-}
-
-void VertexArray::bufferIndexData(const int* data, unsigned int count, GLenum usage)
+void VertexArray::bufferIndexData(const uint* data, uint count, GLenum usage)
 {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, usage);
+
+    icount = count;
 }
 
 void VertexArray::destroy()
 {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDeleteBuffers(1, &vboId);
-    glBindVertexArray(0);
-    glDeleteVertexArrays(1, &vaoId);
+    if (vboId != 0)
+        glDeleteBuffers(1, &vboId);
 
-    if (usingIndices) {
+    glBindVertexArray(0);
+    if (vaoId != 0)
+        glDeleteVertexArrays(1, &vaoId);
+
+    if (usingIndices && iboId != 0) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glDeleteBuffers(1, &iboId);
     }
 
+    vboId = 0;
+    iboId = 0;
     vaoId = 0;
 }
 

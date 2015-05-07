@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include "gl/pipeline.h"
+#include "gl/shaderprogram.h"
 #include "camera.h"
 #include "scene/scenegraph.h"
 #include "scene/scene.h"
@@ -129,6 +130,11 @@ protected:
     virtual void resizeCallback(GLFWwindow* window, int width, int height);
     virtual void cursorCallback(GLFWwindow* window, double xpos, double ypos);
 
+    rgl::ShaderProgram* createShader(const std::string& shaderName,
+                                     const std::vector<rgl::VertexAttrib>& attribs);
+    rgl::ShaderProgram* createShader(const std::string& vertName,
+                                     const std::string& fragName,
+                                     const std::vector<rgl::VertexAttrib>& attribs);
 
 };
 

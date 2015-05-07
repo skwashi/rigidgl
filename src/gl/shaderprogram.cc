@@ -117,7 +117,8 @@ ShaderProgram::ShaderProgram()
 
 ShaderProgram::~ShaderProgram()
 {
-    glDeleteProgram(programId);
+    if (programId != 0)
+        glDeleteProgram(programId);
 }
 
 bool ShaderProgram::create(const std::string& vertSource,
