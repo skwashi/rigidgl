@@ -23,6 +23,7 @@ const std::string UL_DIFFUSE = "diffuse";
 const std::string UL_SPECULAR = "specular";
 const std::string UL_ATTENUATION = "attenuation";
 const std::string UL_CONEANGLE = "coneAngle";
+const std::string UL_RADIUS = "radius";
 
 class Light : public rm::Movable3
 {
@@ -76,9 +77,10 @@ public:
             glm::vec3(1.0f, attenuation, attenuation * attenuation);
     }
 
-    void setPoint()
+    void setPoint(float radius = 1.0f)
     {
         type = POINT;
+        this->radius = radius;
     }
 
     void setDirectional(const glm::vec3& direction)
@@ -87,11 +89,13 @@ public:
         this->direction = direction;
     }
 
-    void setSpot(const glm::vec3& direction, float coneAngle)
+    void setSpot(const glm::vec3& direction, float coneAngle,
+        float radius = 1.0f)
     {
         type = SPOT;
         this->direction = direction;
         this->coneAngle = coneAngle;
+        this->radius = radius;
     }
 
     void updateUniforms(rgl::ShaderProgram& program, int i = -1) const;
@@ -108,6 +112,7 @@ public:
 
     glm::vec3 direction = glm::vec3(0, 0, -1);
     float coneAngle = 0;
+    float radius = 1;
 
 private:
     void updateCommonUniforms(const std::string& prefix,

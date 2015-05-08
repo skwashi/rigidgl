@@ -15,6 +15,7 @@
 #include "textureutils.h"
 #include "vertexarray.h"
 #include "vertexattrib.h"
+#include "vertex.h"
 #include "vertexbuffer.h"
 
 namespace rgl

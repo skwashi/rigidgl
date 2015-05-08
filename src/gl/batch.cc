@@ -15,11 +15,18 @@
 
 using namespace rgl;
 
+Batch::Batch(const std::vector<VertexAttrib>& attribs)
+{
+    vertexBuffer.init(attribs, GL_STREAM_DRAW);
+    this->flushing = false;
+}
+
 Batch::Batch(const std::vector<VertexAttrib>& attribs,
-          int vertexCapacity, int indexCapacity)
+             int vertexCapacity, int indexCapacity, bool flushing)
 {
     vertexBuffer.init(attribs, GL_STREAM_DRAW);
     vertexBuffer.reserve(vertexCapacity, indexCapacity);
+    this->flushing = flushing;
 }
 
 bool Batch::isEmpty() const
@@ -47,6 +54,11 @@ void Batch::unsetColor()
 void Batch::attachProgram(ShaderProgram* program)
 {
     this->program = program;
+}
+
+ShaderProgram* Batch::getProgram()
+{
+    return program;
 }
 
 void Batch::begin()
@@ -97,6 +109,7 @@ void Batch::render(GLenum mode)
 
 void Batch::render(ShaderProgram* program, GLenum mode)
 {
+    bind();
     if (program->hasUniform(U_MODELMATRIX))
         program->setUniformMatrix4f(U_MODELMATRIX, modelMatrix);
     vertexBuffer.render();

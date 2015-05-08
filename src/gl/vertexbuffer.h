@@ -7,10 +7,14 @@
 
 #include <vector>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "rtypes.h"
+#include "math/glmutils.h"
 #include "vertexarray.h"
 #include "vertexattrib.h"
+#include "vertex.h"
 
 namespace rgl {
 
@@ -59,21 +63,40 @@ public:
 
     void reserve(uint vcount);
     void reserve(uint vcount, uint icount);
+    void reserveF(uint fcount);
+    void reserveF(uint fcount, uint icount);
     void clearVertices();
     void clearIndices();
     void clear();
-    void pushVertices(float* vertices, uint vcount);
+    void pushFloats(const float* floats, uint fcount);
     void pushFloat(float f);
-    void pushIndices(uint* indices, uint icount);
+    void pushIndices(const uint* indices, uint icount);
     void pushIndex(uint index);
 
-    void addTriangle(uint v1, uint v2, uint v3);
-    void addTriangle(uint offset);
-    void addQuad(uint v1, uint v2, uint v3, uint v4);
-    void addQuad(uint offset);
+    template <typename T>
+    void pushVector(const T& v);
 
-    void push(float* vertices, uint vcount, unsigned int* indices, uint icount);
-    uint pushItem(float* vertices, uint vcount, unsigned int* indices, uint icount);
+    template <typename T>
+    void pushVertex(const T& vertex);
+
+    void pushVertices(const float* floats, uint fcount);
+
+    template <typename T>
+    void pushVertices(const T* vertices, uint vcount);
+
+    void push(const float* floats, uint fcount, const unsigned int* indices, uint icount);
+    uint pushItem(const float* floats, uint fcount, const unsigned int* indices, uint icount);
+
+    template <typename T>
+    void push(const T* vertices, uint vcount, const uint* indices, uint icount);
+
+    template <typename T>
+    void pushItem(const T* vertices, uint vcount, const uint* indices, uint icount);
+
+    void addTriangleI(uint v1, uint v2, uint v3);
+    void addTriangleI(uint offset);
+    void addQuadI(uint v1, uint v2, uint v3, uint v4);
+    void addQuadI(uint offset);
 
     void bind() const;
     void bufferData(GLenum usage);
@@ -92,9 +115,9 @@ protected:
     bool usingIndices;
 };
 
-inline void VertexBuffer::pushVertices(float* _vertices, uint count)
+inline void VertexBuffer::pushFloats(const float* floats, uint count)
 {
-    vertices.insert(vertices.end(), _vertices, _vertices + count);
+    vertices.insert(vertices.end(), floats, floats + count);
     state = DIRTY;
 }
 
@@ -104,7 +127,7 @@ inline void VertexBuffer::pushFloat(float f)
     state = DIRTY;
 }
 
-inline void VertexBuffer::pushIndices(uint* _indices, uint count)
+inline void VertexBuffer::pushIndices(const uint* _indices, uint count)
 {
     indices.insert(indices.end(), _indices, _indices + count);
     state = DIRTY;
@@ -116,7 +139,7 @@ inline void VertexBuffer::pushIndex(uint index)
     state = DIRTY;
 }
 
-inline void VertexBuffer::addTriangle(uint v1, uint v2, uint v3)
+inline void VertexBuffer::addTriangleI(uint v1, uint v2, uint v3)
 {
     indices.push_back(v1);
     indices.push_back(v2);
@@ -125,7 +148,7 @@ inline void VertexBuffer::addTriangle(uint v1, uint v2, uint v3)
     state = DIRTY;
 }
 
-inline void VertexBuffer::addTriangle(uint offset)
+inline void VertexBuffer::addTriangleI(uint offset)
 {
     indices.push_back(offset);
     indices.push_back(offset + 1);
@@ -134,16 +157,52 @@ inline void VertexBuffer::addTriangle(uint offset)
     state = DIRTY;
 }
 
-inline void VertexBuffer::addQuad(uint v1, uint v2, uint v3, uint v4)
+inline void VertexBuffer::addQuadI(uint v1, uint v2, uint v3, uint v4)
 {
-    addTriangle(v1, v2, v3);
-    addTriangle(v1, v3, v4);
+    addTriangleI(v1, v2, v3);
+    addTriangleI(v1, v3, v4);
 }
 
-inline void VertexBuffer::addQuad(uint offset)
+inline void VertexBuffer::addQuadI(uint offset)
 {
-    addTriangle(offset, offset + 1, offset + 2);
-    addTriangle(offset, offset + 2, offset + 3);
+    addTriangleI(offset, offset + 1, offset + 2);
+    addTriangleI(offset, offset + 2, offset + 3);
+}
+
+template <typename T>
+inline void VertexBuffer::pushVector(const T& v)
+{
+    pushFloats(glm::value_ptr(v), numFloats(v));
+}
+
+template <typename T>
+inline void VertexBuffer::pushVertex(const T& vertex)
+{
+    pushFloats((float*) &vertex, numFloats(vertex));
+}
+
+inline void VertexBuffer::pushVertices(const float* floats, uint fcount)
+{
+    pushFloats(floats, fcount);
+}
+
+template <typename T>
+inline void VertexBuffer::pushVertices(const T* vertices, uint vcount)
+{
+    pushFloats((float*) vertices, vcount * numFloats(vertices[0]));
+}
+
+template <typename T>
+inline void VertexBuffer::push(const T* vertices, uint vcount, const uint* indices, uint icount)
+{
+    push((float*) vertices, vcount * numFloats(vertices[0]),
+         indices, icount);
+}
+
+template <typename T>
+inline void VertexBuffer::pushItem(const T* vertices, uint vcount, const uint* indices, uint icount)
+{
+    pushItem((float*) vertices, vcount * numFloats(vertices[0]), indices, icount);
 }
 
 } // namespace

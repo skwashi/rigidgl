@@ -50,11 +50,17 @@ void Scene::render(const Camera& camera,
                    rgl::ShaderProgram& program, bool lighting)
 {
     if (lighting) {
-        for (Light* light : lights) {
+        for (int i = 0, num = lights.size(); i < num; i++) {
+            Light* light = lights[i];
+            if (i == 0)
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            else
+                glBlendFunc(GL_ONE, GL_ONE);
             light->updateUniforms(camera.getTransform(), program);
             for (Model* model : models)
                 model->render(program);
         }
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     } else {
         for (Model* model : models)
             model->render(program);

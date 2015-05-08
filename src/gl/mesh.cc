@@ -176,7 +176,7 @@ void Mesh::bufferData(GLenum usage)
         int count = face.count;
         int start = face.vs[0];
         for (int i = 1; i < count - 1; i++) {
-            vertexBuffer.addTriangle(start, face.vs[i], face.vs[i+1]);
+            vertexBuffer.addTriangleI(start, face.vs[i], face.vs[i+1]);
         }
     }
 
@@ -221,7 +221,7 @@ void Mesh::bufferData(bool flat, GLenum usage)
             }
         }
         for (int j = 1; j < face.count - 1; j++) {
-            vertexBuffer.addTriangle(vertexCount, vertexCount + j, vertexCount + j + 1);
+            vertexBuffer.addTriangleI(vertexCount, vertexCount + j, vertexCount + j + 1);
         }
         vertexCount += face.count;
     }
@@ -274,7 +274,7 @@ void Mesh::bufferFaceData(bool flat, GLenum usage)
             }
 
             for (int j = 1; j < face.count - 1; j++) {
-                vertexBuffer.addTriangle(vertexCount, vertexCount + j, vertexCount + j + 1);
+                vertexBuffer.addTriangleI(vertexCount, vertexCount + j, vertexCount + j + 1);
             }
             vertexCount += face.count;
         }

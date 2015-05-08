@@ -38,11 +38,13 @@ void main() {
     float distance = length(surf_to_light);
     vec3 L = surf_to_light / distance;
     vec3 V = normalize(-pass_position);
+    vec3 N = normalize(pass_normal);
 
     float a = attenuation(distance);
+    float secularPower = 1;
 
-    vec3 diffusePart = a * light.diffuse * diffuse(pass_normal, L);
-    vec3 specularPart = a * light.specular * specular(pass_normal, L, V, 8);
+    vec3 diffusePart = a * light.diffuse * diffuse(N, L);
+    vec3 specularPart = a * light.specular * specular(N, L, V, 32);
 
     vec3 gamma = vec3(1.0/2.2);
     vec3 linearColor = light.ambient + diffusePart + specularPart;

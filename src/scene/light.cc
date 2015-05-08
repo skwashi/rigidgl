@@ -32,6 +32,9 @@ void Light::updateCommonUniforms(const std::string& prefix,
 
     if (program.hasUniform(prefix + UL_CONEANGLE))
         program.setUniform1f(prefix + UL_CONEANGLE, coneAngle);
+
+    if (program.hasUniform(prefix + UL_RADIUS))
+        program.setUniform1f(prefix + UL_RADIUS, radius);
 }
 
 void Light::updateUniforms(rgl::ShaderProgram& program, int i) const

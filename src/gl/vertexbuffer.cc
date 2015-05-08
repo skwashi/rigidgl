@@ -79,12 +79,22 @@ bool VertexBuffer::isInited() const
 
 void VertexBuffer::reserve(uint vcount)
 {
-    vertices.reserve(vertices.size() + vcount);
+    reserveF(vcount * vsize);
 }
 
 void VertexBuffer::reserve(uint vcount, uint icount)
 {
-    vertices.reserve(vertices.size() + vcount);
+    reserveF(vcount * vsize, icount);
+}
+
+void VertexBuffer::reserveF(uint fcount)
+{
+    vertices.reserve(vertices.size() + fcount);
+}
+
+void VertexBuffer::reserveF(uint fcount, uint icount)
+{
+    vertices.reserve(vertices.size() + fcount);
     indices.reserve(indices.size() + icount);
 }
 
@@ -104,11 +114,11 @@ void VertexBuffer::clear()
     clearIndices();
 }
 
-void VertexBuffer::push(float* vertices, uint vcount, uint* indices, uint icount)
+void VertexBuffer::push(const float* floats, uint fcount, const uint* indices, uint icount)
 {
     uint vstart = getVertexCount();
     uint istart = getIndexCount();
-    pushVertices(vertices, vcount);
+    pushFloats(floats, fcount);
     pushIndices(indices, icount);
 
     for (int i = istart, iend = istart + icount; i < iend; i++)
@@ -117,17 +127,17 @@ void VertexBuffer::push(float* vertices, uint vcount, uint* indices, uint icount
     state = DIRTY;
 }
 
-uint VertexBuffer::pushItem(float* vertices, uint vcount, uint* indices, uint icount)
+uint VertexBuffer::pushItem(const float* floats, uint fcount, const uint* indices, uint icount)
 {
     uint vstart = getVertexCount();
     uint istart = getIndexCount();
-    pushVertices(vertices, vcount);
-    pushIndices(indices, vcount);
+    pushFloats(floats, fcount);
+    pushIndices(indices, icount);
 
     for (int i = istart, iend = istart + icount; i < iend; i++)
         this->indices[i] += vstart;
 
-    Item item = {vstart, vcount, istart, icount};
+    Item item = {vstart, fcount / vsize, istart, icount};
     items.push_back(item);
     state = DIRTY;
 

@@ -84,6 +84,8 @@ void GLApp::initGlfw()
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
+    glfwWindowHint(GLFW_DEPTH_BITS,32);
+
     glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
 }
 
@@ -101,6 +103,7 @@ void GLApp::initGL()
     glViewport(0, 0, width, height);
     glClearColor(0, 0, 0, 1);
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
     glEnable (GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
@@ -153,23 +156,25 @@ void GLApp::handleInput()
     cursor.x = xpos;
     cursor.y = ypos;
 
+    float ds = 10;
+
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.translateLocally(0, 20 * dt, 0);
+        camera.translateLocally(0, ds * dt, 0);
 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.translateLocally(0, -20 * dt, 0);
+        camera.translateLocally(0, -ds * dt, 0);
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.translateLocally(-20 * dt, 0, 0);
+        camera.translateLocally(-ds * dt, 0, 0);
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.translateLocally(20 * dt, 0, 0);
+        camera.translateLocally(ds * dt, 0, 0);
 
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        camera.translateLocally(0, 0, -20 * dt);
+        camera.translateLocally(0, 0, -ds * dt);
 
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        camera.translateLocally(0, 0, 20 * dt);
+        camera.translateLocally(0, 0, ds * dt);
 
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
         camera.rotateLocally(R_PI * dt, 0, 0, 1);

@@ -26,14 +26,17 @@ public:
         BATCHING = 1
     };
 
+    Batch(const std::vector<VertexAttrib>& attribs);
+
     Batch(const std::vector<VertexAttrib>& attribs,
-          int vertexCapacity, int indexCapacity);
+          int vertexCapacity, int indexCapacity, bool flushing = true);
 
     bool isEmpty() const;
     void setColor(const Color& color);
     void setColor(float r, float g, float b, float a);
     void unsetColor();
     void attachProgram(ShaderProgram* program);
+    ShaderProgram* getProgram();
     void begin();
     void end();
     void clear();
@@ -43,17 +46,18 @@ public:
     virtual void render(GLenum mode = GL_TRIANGLES);
     virtual void render(ShaderProgram* program, GLenum mode = GL_TRIANGLES);
 
-    void addTriangle();
-    void addTriangle(uint offset);
-    void addTriangle(uint v1, uint v2, uint v3);
-    void addQuad();
-    void addQuad(uint offset);
-    void addQuad(uint v1, uint v2, uint v3, uint v4);
+    void addTriangleI();
+    void addTriangleI(uint offset);
+    void addTriangleI(uint v1, uint v2, uint v3);
+    void addQuadI();
+    void addQuadI(uint offset);
+    void addQuadI(uint v1, uint v2, uint v3, uint v4);
 
 protected:
     VertexBuffer vertexBuffer;
     int vertexCapacity;
     int indexCapacity;
+    bool flushing;
     int vertexCount = 0;
     int indexCount = 0;
     State state = IDLE;
@@ -67,33 +71,33 @@ protected:
     virtual void flushCheck(int newCount = 0);
 };
 
-inline void Batch::addTriangle()
+inline void Batch::addTriangleI()
 {
-    vertexBuffer.addTriangle(vertexCount);
+    vertexBuffer.addTriangleI(vertexCount);
 }
 
-inline void Batch::addTriangle(uint offset) {
-    vertexBuffer.addTriangle(offset);
+inline void Batch::addTriangleI(uint offset) {
+    vertexBuffer.addTriangleI(offset);
 }
 
-inline void Batch::addTriangle(uint v1, uint v2, uint v3)
+inline void Batch::addTriangleI(uint v1, uint v2, uint v3)
 {
-    vertexBuffer.addTriangle(vertexCount + v1, vertexCount + v2, vertexCount + v3);
+    vertexBuffer.addTriangleI(vertexCount + v1, vertexCount + v2, vertexCount + v3);
 }
 
-inline void Batch::addQuad()
+inline void Batch::addQuadI()
 {
-    vertexBuffer.addQuad(vertexCount);
+    vertexBuffer.addQuadI(vertexCount);
 }
 
-inline void Batch::addQuad(uint offset)
+inline void Batch::addQuadI(uint offset)
 {
-    vertexBuffer.addQuad(offset);
+    vertexBuffer.addQuadI(offset);
 }
 
-inline void Batch::addQuad(uint v1, uint v2, uint v3, uint v4)
+inline void Batch::addQuadI(uint v1, uint v2, uint v3, uint v4)
 {
-    vertexBuffer.addQuad(vertexCount + v1, vertexCount + v2,
+    vertexBuffer.addQuadI(vertexCount + v1, vertexCount + v2,
                          vertexCount + v3, vertexCount + v4);
 }
 
@@ -104,7 +108,7 @@ inline void Batch::bind() const
 
 inline void Batch::flushCheck(int newCount)
 {
-    if (vertexCount + newCount > vertexCapacity)
+    if (flushing && (vertexCount + newCount > vertexCapacity))
         flush();
 }
 
