@@ -69,7 +69,6 @@ void VertexArray::bufferVertexData(const float* data, uint count, GLenum usage)
 {
     glBindBuffer(GL_ARRAY_BUFFER, vboId);
     glBufferData(GL_ARRAY_BUFFER, count * sizeof(float), data, usage);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     vcount = count / numComponents;
 }
@@ -79,6 +78,25 @@ void VertexArray::bufferIndexData(const uint* data, uint count, GLenum usage)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, usage);
 
     icount = count;
+}
+
+void VertexArray::bufferIndexData(const std::vector<uint>& indices, GLenum usage)
+{
+    bufferIndexData(&indices[0], indices.size());
+}
+
+template <typename T>
+void VertexArray::bufferVertexData(const T* vertices, unsigned int count, GLenum usage)
+{
+    glBindBuffer(GL_ARRAY_BUFFER, vboId);
+    glBufferData(GL_ARRAY_BUFFER, count * sizeof(T), vertices, usage);
+    vcount = count / numComponents * sizeof(T) / sizeof(float);
+}
+
+template <typename T>
+void VertexArray::bufferVertexData(const std::vector<T>& vertices, GLenum usage)
+{
+    bufferVertexData(&vertices[0], vertices.size(), usage);
 }
 
 void VertexArray::destroy()

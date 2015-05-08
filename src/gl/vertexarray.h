@@ -40,12 +40,30 @@ public:
 
     void bufferIndexData(const uint* data, unsigned int count, GLenum usage = GL_STATIC_DRAW);
 
-    void bufferData(const float* vertexData, uint vcount,
+    void bufferIndexData(const std::vector<uint>& indices, GLenum usage = GL_STATIC_DRAW);
+
+    template <typename T>
+    void bufferVertexData(const T* vertices, unsigned int count, GLenum usage = GL_STATIC_DRAW);
+
+    template <typename T>
+    void bufferVertexData(const std::vector<T>& vertices, GLenum usage = GL_STATIC_DRAW);
+
+    template <typename T>
+    void bufferData(const T* vertexData, uint vcount,
                     const uint* indexData, uint icount,
                     GLenum usage = GL_STATIC_DRAW)
     {
         bufferVertexData(vertexData, vcount, usage);
         bufferIndexData(indexData, icount, usage);
+    }
+
+    template <typename T>
+    void bufferData(const std::vector<T> vertices,
+                    const std::vector<uint> indices,
+                    GLenum usage = GL_STATIC_DRAW)
+    {
+        bufferVertexData(vertices, usage);
+        bufferIndexData(indices, usage);
     }
 
     void drawArrays(GLenum mode = GL_TRIANGLES) const
