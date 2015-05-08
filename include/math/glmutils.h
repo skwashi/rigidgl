@@ -9,6 +9,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "rtypes.h"
+
 namespace glm {
 
 inline mat3 mat3fromColumns(const vec3& col1, const vec3& col2, const vec3& col3)
