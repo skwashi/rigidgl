@@ -83,8 +83,6 @@ bool loadObj(const char* fname, rgl::Mesh& mesh)
         return false;
     }
 
-    bool textured = false;
-
     std::cout << "Loading mesh from file " << fname << std::endl;
     mesh.clear();
     std::string line;
@@ -104,6 +102,7 @@ bool loadObj(const char* fname, rgl::Mesh& mesh)
             std::istringstream texCoordLine(line.substr(3));
             texCoordLine >> texCoord.s;
             texCoordLine >> texCoord.t;
+            mesh.addTexCoord(texCoord);
         } else if (line.substr(0, 2) == "f ") {
             faceVs.clear();
             faceTs.clear();
@@ -126,7 +125,6 @@ bool loadObj(const char* fname, rgl::Mesh& mesh)
             }
             int count = faceVs.size();
             if (!faceTs.empty()) {
-                textured = true;
                 mesh.addFace(rgl::Face(count, &faceVs[0], &faceTs[0]));
             } else {
                 mesh.addFace(rgl::Face(count, &faceVs[0]));
@@ -134,10 +132,6 @@ bool loadObj(const char* fname, rgl::Mesh& mesh)
 
         } else {
         }
-    }
-
-    if (textured) {
-        mesh.useTextures();
     }
 
     mesh.computeFaceNormals();

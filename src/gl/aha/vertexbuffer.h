@@ -35,7 +35,7 @@ public:
         BUFFERING = 2
     };
 
-    virtual ~VertexBuffer();
+    virtual ~VertexBuffer() {};
 
     void useIndices(bool flag);
     void setUsage(GLenum usage);
@@ -56,7 +56,7 @@ public:
 protected:
     VertexArray vertexArray;
     std::vector<Item> items;
-
+    uint vsize;
     State state = CLEAN;
     GLenum usage;
     bool usingIndices;
@@ -101,6 +101,10 @@ public:
     uint pushItem(const std::vector<V>& vertices,
                   const std::vector<uint>& indices);
 
+    void pushFloats(const float* floats, uint fcount);
+    void push(const float* floats, uint fcount,
+              const uint* indices, uint icount);
+
     void addTriangleI(uint v1, uint v2, uint v3);
     void addTriangleI(uint offset);
     void addQuadI(uint v1, uint v2, uint v3, uint v4);
@@ -116,6 +120,7 @@ inline VBuffer<V>::VBuffer(GLenum usage)
 {
     V v;
     vertexArray.init(attribs(v));
+    vsize = sizeof(V) / sizeof(float);
 }
 
 template <typename V>
@@ -265,6 +270,19 @@ inline uint VBuffer<V>::pushItem(const std::vector<V>& vertices,
 {
     push(vertices, indices, true);
     return items.size() - 1;
+}
+
+template <typename V>
+inline void VBuffer<V>::pushFloats(const float* floats, uint fcount)
+{
+    pushVertices((V*) floats, fcount / vsize);
+}
+
+template <typename V>
+inline void VBuffer<V>::push(const float* floats, uint fcount,
+                             const uint* indices, uint icount)
+{
+    push((V*) floats, fcount / vsize, indices, icount);
 }
 
 template <typename V>

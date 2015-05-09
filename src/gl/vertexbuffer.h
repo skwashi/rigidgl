@@ -21,6 +21,7 @@ namespace rgl {
 class VertexBuffer
 {
 public:
+
     struct Item {
         uint vstart;
         uint vcount;
@@ -34,80 +35,26 @@ public:
         BUFFERING = 2
     };
 
-    VertexBuffer() {}
-
-    VertexBuffer(const std::vector<VertexAttrib>& attribs)
-        : VertexBuffer(attribs, GL_STATIC_DRAW) {}
-
-    VertexBuffer(const std::vector<VertexAttrib>& attribs, GLenum usage);
-
-    VertexBuffer(const VertexAttrib* attribs, uint count)
-        : VertexBuffer(attribs, count, GL_STATIC_DRAW) {}
-
-    VertexBuffer(const VertexAttrib* attribs, uint count, GLenum usage);
-
-    ~VertexBuffer() {}
-
-    void init(const std::vector<VertexAttrib>& attribs, GLenum usage = GL_STATIC_DRAW);
-
-    void init(const VertexAttrib* attribs, uint count, GLenum usage = GL_STATIC_DRAW);
+    virtual ~VertexBuffer() {};
 
     void useIndices(bool flag);
     void setUsage(GLenum usage);
     Item getItem(uint index) const;
-    uint getVertexCount() const;
-    uint getIndexCount() const;
+    const VertexAttribs& getAttribs() const;
     uint getItemCount() const;
+    uint getVertexSize() const;
     bool isUsingIndices() const;
     bool isInited() const;
 
-    void reserve(uint vcount);
-    void reserve(uint vcount, uint icount);
-    void reserveF(uint fcount);
-    void reserveF(uint fcount, uint icount);
-    void clearVertices();
-    void clearIndices();
-    void clear();
-    void pushFloats(const float* floats, uint fcount);
-    void pushFloat(float f);
-    void pushIndices(const uint* indices, uint icount);
-    void pushIndex(uint index);
-
-    template <typename T>
-    void pushVector(const T& v);
-
-    template <typename T>
-    void pushVertex(const T& vertex);
-
-    void pushVertices(const float* floats, uint fcount);
-
-    template <typename T>
-    void pushVertices(const T* vertices, uint vcount);
-
-    void push(const float* floats, uint fcount, const unsigned int* indices, uint icount);
-    uint pushItem(const float* floats, uint fcount, const unsigned int* indices, uint icount);
-
-    template <typename T>
-    void push(const T* vertices, uint vcount, const uint* indices, uint icount);
-
-    template <typename T>
-    void pushItem(const T* vertices, uint vcount, const uint* indices, uint icount);
-
-    void addTriangleI(uint v1, uint v2, uint v3);
-    void addTriangleI(uint offset);
-    void addQuadI(uint v1, uint v2, uint v3, uint v4);
-    void addQuadI(uint offset);
-
     void bind() const;
-    void bufferData(GLenum usage);
+    virtual void bufferData(GLenum usage) = 0;
+
     void render(GLenum mode = GL_TRIANGLES);
     void renderItem(uint index, GLenum mode = GL_TRIANGLES);
     void renderItems(uint index, uint count, GLenum mode = GL_TRIANGLES);
 
 protected:
     VertexArray vertexArray;
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
     std::vector<Item> items;
     uint vsize;
     State state = CLEAN;
@@ -115,31 +62,231 @@ protected:
     bool usingIndices;
 };
 
-inline void VertexBuffer::pushFloats(const float* floats, uint count)
+template <typename V>
+class VBuffer : public VertexBuffer
 {
-    vertices.insert(vertices.end(), floats, floats + count);
+public:
+    VBuffer(GLenum usage = GL_STATIC_DRAW);
+
+    uint getVertexCount() const;
+    uint getIndexCount() const;
+
+    void bufferData(GLenum usage);
+
+    void reserve(uint vcount);
+    void reserve(uint vcount, uint icount);
+
+    void increase(uint vcount);
+    void increase(uint vcount, uint icount);
+
+    void clearVertices();
+    void clearIndices();
+    void clear();
+
+    void pushVertex(const V& vertex);
+    void pushVertices(const V* vertices, uint count);
+    void pushVertices(const std::vector<V>& vertices);
+
+    void pushIndex(uint index);
+    void pushIndices(const uint* indices, uint count);
+    void pushIndices(const std::vector<uint>& indices);
+
+    void push(const V* vertices, uint vcount,
+              const uint* indices, uint icount, bool createItem = false);
+    void push(const std::vector<V>& vertices,
+              const std::vector<uint>& indices, bool createItem = false);
+
+    uint pushItem(const V* vertices, uint vcount,
+                  const uint* indices, uint icount);
+    uint pushItem(const std::vector<V>& vertices,
+                  const std::vector<uint>& indices);
+
+    void pushFloats(const float* floats, uint fcount);
+    void push(const float* floats, uint fcount,
+              const uint* indices, uint icount);
+
+    void addTriangleI(uint v1, uint v2, uint v3);
+    void addTriangleI(uint offset);
+    void addQuadI(uint v1, uint v2, uint v3, uint v4);
+    void addQuadI(uint offset);
+
+protected:
+    std::vector<V> vertices;
+    std::vector<uint> indices;
+};
+
+template <typename V>
+inline VBuffer<V>::VBuffer(GLenum usage)
+{
+    V v;
+    vertexArray.init(attribs(v));
+    vsize = sizeof(V) / sizeof(float);
+}
+
+template <typename V>
+inline uint VBuffer<V>::getVertexCount() const
+{
+    return vertices.size();
+}
+
+template <typename V>
+inline uint VBuffer<V>::getIndexCount() const
+{
+    return indices.size();
+}
+
+template <typename V>
+inline void VBuffer<V>::bufferData(GLenum usage)
+{
+    state = BUFFERING;
+    vertexArray.bufferData(vertices, indices, usage);
+    state = CLEAN;
+}
+
+template <typename V>
+inline void VBuffer<V>::reserve(uint vcount)
+{
+    vertices.reserve(vcount);
+}
+
+template <typename V>
+inline void VBuffer<V>::reserve(uint vcount, uint icount)
+{
+    vertices.reserve(vcount);
+    indices.reserve(icount);
+}
+
+template <typename V>
+inline void VBuffer<V>::increase(uint vcount)
+{
+    vertices.reserve(vertices.size() + vcount);
+}
+
+template <typename V>
+inline void VBuffer<V>::increase(uint vcount, uint icount)
+{
+    vertices.reserve(vertices.size() + vcount);
+    indices.reserve(indices.size() + icount);
+}
+
+template <typename V>
+inline void VBuffer<V>::clearVertices()
+{
+    vertices.clear();
+}
+
+template <typename V>
+inline void VBuffer<V>::clearIndices()
+{
+    indices.clear();
+}
+
+template <typename V>
+inline void VBuffer<V>::clear()
+{
+    clearVertices();
+    clearIndices();
+}
+
+template <typename V>
+inline void VBuffer<V>::pushVertex(const V& vertex)
+{
+    vertices.push_back(vertex);
     state = DIRTY;
 }
 
-inline void VertexBuffer::pushFloat(float f)
+template <typename V>
+inline void VBuffer<V>::pushVertices(const V* _vertices, uint count)
 {
-    vertices.push_back(f);
+    vertices.insert(vertices.end(), _vertices, _vertices + count);
     state = DIRTY;
 }
 
-inline void VertexBuffer::pushIndices(const uint* _indices, uint count)
+template <typename V>
+inline void VBuffer<V>::pushVertices(const std::vector<V>& _vertices)
 {
-    indices.insert(indices.end(), _indices, _indices + count);
-    state = DIRTY;
+    pushVertices(&_vertices[0], _vertices.size());
 }
 
-inline void VertexBuffer::pushIndex(uint index)
+template <typename V>
+inline void VBuffer<V>::pushIndex(uint index)
 {
     indices.push_back(index);
     state = DIRTY;
 }
 
-inline void VertexBuffer::addTriangleI(uint v1, uint v2, uint v3)
+template <typename V>
+inline void VBuffer<V>::pushIndices(const uint* _indices, uint count)
+{
+    indices.insert(indices.end(), _indices, _indices + count);
+    state = DIRTY;
+}
+
+template <typename V>
+inline void VBuffer<V>::pushIndices(const std::vector<uint>& _indices)
+{
+    pushIndices(&_indices[0], _indices.size());
+}
+
+template <typename V>
+inline void VBuffer<V>::push(const V* _vertices, uint vcount,
+                             const uint* _indices, uint icount,
+                             bool createItem)
+{
+    uint vstart = getVertexCount();
+    uint istart = getIndexCount();
+    pushVertices(_vertices, vcount);
+    pushIndices(_indices, vcount);
+
+    for (int i = istart, iend = istart + icount; i < iend; i++)
+        indices[i] += vstart;
+
+    if (createItem) {
+        Item item = {vstart, vcount, istart, icount};
+        items.push_back(item);
+    }
+}
+
+template <typename V>
+inline void VBuffer<V>::push(const std::vector<V>& _vertices,
+                             const std::vector<uint>& _indices,
+                             bool createItem)
+{
+    push(&_vertices[0], _vertices.size(),
+         &_indices[0], _indices.size(), createItem);
+}
+
+template <typename V>
+inline uint VBuffer<V>::pushItem(const V* _vertices, uint vcount,
+              const uint* _indices, uint icount)
+{
+    push(_vertices, vcount, _indices, icount, true);
+    return items.size() - 1;
+}
+
+template <typename V>
+inline uint VBuffer<V>::pushItem(const std::vector<V>& vertices,
+              const std::vector<uint>& indices)
+{
+    push(vertices, indices, true);
+    return items.size() - 1;
+}
+
+template <typename V>
+inline void VBuffer<V>::pushFloats(const float* floats, uint fcount)
+{
+    pushVertices((V*) floats, fcount / vsize);
+}
+
+template <typename V>
+inline void VBuffer<V>::push(const float* floats, uint fcount,
+                             const uint* indices, uint icount)
+{
+    push((V*) floats, fcount / vsize, indices, icount);
+}
+
+template <typename V>
+inline void VBuffer<V>::addTriangleI(uint v1, uint v2, uint v3)
 {
     indices.push_back(v1);
     indices.push_back(v2);
@@ -148,7 +295,8 @@ inline void VertexBuffer::addTriangleI(uint v1, uint v2, uint v3)
     state = DIRTY;
 }
 
-inline void VertexBuffer::addTriangleI(uint offset)
+template <typename V>
+inline void VBuffer<V>::addTriangleI(uint offset)
 {
     indices.push_back(offset);
     indices.push_back(offset + 1);
@@ -157,52 +305,17 @@ inline void VertexBuffer::addTriangleI(uint offset)
     state = DIRTY;
 }
 
-inline void VertexBuffer::addQuadI(uint v1, uint v2, uint v3, uint v4)
+template <typename V>
+inline void VBuffer<V>::addQuadI(uint v1, uint v2, uint v3, uint v4)
 {
     addTriangleI(v1, v2, v3);
     addTriangleI(v1, v3, v4);
 }
 
-inline void VertexBuffer::addQuadI(uint offset)
+template <typename V>
+inline void VBuffer<V>::addQuadI(uint offset)
 {
-    addTriangleI(offset, offset + 1, offset + 2);
-    addTriangleI(offset, offset + 2, offset + 3);
-}
-
-template <typename T>
-inline void VertexBuffer::pushVector(const T& v)
-{
-    pushFloats(glm::value_ptr(v), numFloats(v));
-}
-
-template <typename T>
-inline void VertexBuffer::pushVertex(const T& vertex)
-{
-    pushFloats((float*) &vertex, numFloats(vertex));
-}
-
-inline void VertexBuffer::pushVertices(const float* floats, uint fcount)
-{
-    pushFloats(floats, fcount);
-}
-
-template <typename T>
-inline void VertexBuffer::pushVertices(const T* vertices, uint vcount)
-{
-    pushFloats((float*) vertices, vcount * numFloats(vertices[0]));
-}
-
-template <typename T>
-inline void VertexBuffer::push(const T* vertices, uint vcount, const uint* indices, uint icount)
-{
-    push((float*) vertices, vcount * numFloats(vertices[0]),
-         indices, icount);
-}
-
-template <typename T>
-inline void VertexBuffer::pushItem(const T* vertices, uint vcount, const uint* indices, uint icount)
-{
-    pushItem((float*) vertices, vcount * numFloats(vertices[0]), indices, icount);
+    addQuadI(offset, offset + 1, offset + 2, offset + 3);
 }
 
 } // namespace

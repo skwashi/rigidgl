@@ -34,7 +34,7 @@ void Lighting::init(int width, int height, const char* title)
     if (program)
         pipeline.watchProgram(program);
 
-    Mesh* mesh = new Mesh();
+    Mesh* mesh = new MeshN();
     bool success = loadObj(assets::MODEL_DIR + "teapot.obj", *mesh);
 
     if (success) {
@@ -45,7 +45,7 @@ void Lighting::init(int width, int height, const char* title)
         scene.addModel(model);
     }
 
-    mesh = new Mesh();
+    mesh = new MeshN();
     success = loadObj(assets::MODEL_DIR + "armadillo.obj", *mesh);
 
     if (success) {
@@ -72,7 +72,7 @@ void Lighting::init(int width, int height, const char* title)
     light->radius = 1;
     scene.addLight(light);
 
-    buffer = new VertexBuffer(VAS_POS3);
+    buffer = new VBuffer<vec3>;
 
     qprogram = createShader("lightsphere", VAS_POS3);
     if (qprogram)

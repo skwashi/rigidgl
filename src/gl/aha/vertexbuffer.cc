@@ -4,7 +4,7 @@
 
 
 #include "rtypes.h"
-#include "vertexbuffert.h"
+#include "vertexbuffer.h"
 #include "vertexattrib.h"
 #include "vertexarray.h"
 

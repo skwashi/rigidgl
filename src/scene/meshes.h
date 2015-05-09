@@ -34,7 +34,7 @@ const std::vector<rgl::Face> cubeF = {
 inline rgl::Mesh* createCubeMesh(rgl::Mesh* mesh = NULL)
 {
     if (mesh == NULL)
-        mesh = new rgl::Mesh();
+        mesh = new rgl::MeshN();
     mesh->addVertices(&cubeV[0], cubeV.size());
     mesh->addFaces(&cubeF[0], cubeF.size());
     mesh->computeFaceNormals();

@@ -24,7 +24,7 @@ private:
 
     rgl::ShaderProgram* program = NULL;
     rgl::ShaderProgram* qprogram = NULL;
-    rgl::VertexBuffer* buffer = NULL;
+    rgl::VBuffer<glm::vec3>* buffer = NULL;
 };
 
 #endif

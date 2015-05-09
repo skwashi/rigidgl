@@ -38,7 +38,7 @@ using namespace std;
 using namespace glm;
 using namespace rgl;
 
-static void add_text(VertexBuffer* vertexBuffer, ftgl::texture_font_t * font,
+static void add_text(VBuffer<Vertex3tc>* vbuffer, ftgl::texture_font_t * font,
                      const wchar_t * text, glm::vec4 * color, glm::vec2 * pen )
 {
     size_t i;
@@ -67,7 +67,7 @@ static void add_text(VertexBuffer* vertexBuffer, ftgl::texture_font_t * font,
                                       x0,y1,0,  s0,t1,  r,g,b,a ,
                                       x1,y1,0,  s1,t1,  r,g,b,a ,
                                       x1,y0,0,  s1,t0,  r,g,b,a };
-            vertexBuffer->push(vertices, 4 * 9, indices, 6 );
+            vbuffer->push(vertices, 4 * 9, indices, 6 );
             pen->x += glyph->advance_x;
         }
     }
@@ -91,7 +91,7 @@ void Cubes::init(int width, int height, const char* title)
     // temp stuff for testing
 
 
-    cubeMesh = new Mesh();
+    cubeMesh = new MeshNTC();
 
     cubeMesh->addVertex(vec3(-0.5f, 0.5f, 0.5f));
     cubeMesh->addVertex(vec3(-0.5f, -0.5f, 0.5f));
@@ -159,8 +159,6 @@ void Cubes::init(int width, int height, const char* title)
 
     cubeMesh->computeFaceNormals();
     cubeMesh->computeVertexNormals();
-    cubeMesh->useColors();
-    cubeMesh->useTextures();
 
     cubeMesh->bufferFaceData(GL_STATIC_DRAW);
 
@@ -185,8 +183,7 @@ void Cubes::init(int width, int height, const char* title)
     CubeMap* cm = new CubeMap(intFormat, format, wi,
                               data, data, data, data, data, data, true);
 
-    Mesh* cmesh = new Mesh();
-    rgl::createCubeMesh(cmesh);
+    Mesh* cmesh = createCubeMesh();
     cmesh->bufferData();
 
     Node* pivot = sceneGraph.allocateNode();
@@ -245,7 +242,7 @@ void Cubes::init(int width, int height, const char* title)
         }
     program = &cprogram;
 
-    Mesh* testMesh = new Mesh();
+    Mesh* testMesh = new MeshN();
     bool success = loadObj((assets::MODEL_DIR + "bunny.obj").c_str(), *testMesh);
     if (success) {
         testMesh->bufferData();
@@ -256,7 +253,8 @@ void Cubes::init(int width, int height, const char* title)
     }
 
 
-    textVB = new VertexBuffer(VAS_POSTEXCOL);
+    auto vbuffer = new VBuffer<Vertex3tc>;
+    textVB = vbuffer;
 
     textprog = new ShaderProgram() ;
     textprog->create(readFile((dir + "texcol.vert").c_str()),
@@ -278,7 +276,7 @@ void Cubes::init(int width, int height, const char* title)
         pen.x = 5;
         pen.y -= font->height;
         texture_font_load_glyphs( font, text );
-        add_text(textVB, font, text, &black, &pen );
+        add_text(vbuffer, font, text, &black, &pen );
         texture_font_delete( font );
     }
 
@@ -304,9 +302,6 @@ void Cubes::render()
 void Cubes::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     GLApp::keyCallback(window, key, scancode, action, mods);
-    // if (key == GLFW_KEY_O && action == GLFW_PRESS) {
-    //     cubeMesh->bufferData(!cubeMesh->flatShading, GL_STATIC_DRAW);
-    // }
 
     if (key == GLFW_KEY_O && action == GLFW_PRESS) {
         scene.models[3]->texture->bind();
