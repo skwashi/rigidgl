@@ -67,7 +67,7 @@ static void add_text(VBuffer<Vertex3tc>* vbuffer, ftgl::texture_font_t * font,
                                       x0,y1,0,  s0,t1,  r,g,b,a ,
                                       x1,y1,0,  s1,t1,  r,g,b,a ,
                                       x1,y0,0,  s1,t0,  r,g,b,a };
-            vbuffer->push(vertices, 4 * 9, indices, 6 );
+            vbuffer->pushFloats(vertices, 4 * 9, indices, 6 );
             pen->x += glyph->advance_x;
         }
     }
@@ -280,8 +280,6 @@ void Cubes::init(int width, int height, const char* title)
         texture_font_delete( font );
     }
 
-    textVB->bind();
-    textVB->bufferData(GL_STATIC_DRAW);
     glBindTexture( GL_TEXTURE_2D, atlas->id );
 }
 

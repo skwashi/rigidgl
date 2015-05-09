@@ -40,6 +40,7 @@ void Lighting::init(int width, int height, const char* title)
     if (success) {
         mesh->bufferData();
         Model* model = new Model(sceneGraph.allocateNode(), mesh);
+        model->moveTo(-1, 0, 0);
         model->node->w = vec3(0, -R_PI/2, 0);
         model->attachProgram(cprogram);
         scene.addModel(model);
@@ -72,10 +73,10 @@ void Lighting::init(int width, int height, const char* title)
     light->radius = 1;
     scene.addLight(light);
 
-    buffer = new VBuffer<vec3>;
+    buffer = new VBuffer<vec3>(GL_STREAM_DRAW);
 
-    qprogram = createShader("lightsphere", VAS_POS3);
-    if (qprogram)
+    qprogram = createShader("lightsphere", VAS_3);
+        if (qprogram)
         pipeline.watchProgram(qprogram);
 
 }
@@ -93,7 +94,6 @@ void Lighting::renderLight(Light* light)
     buffer->pushVertex(lightPos + dx - dy);
     buffer->pushVertex(lightPos + dx + dy);
     buffer->addQuadI(0);
-
     qprogram->use();
     light->updateUniforms(camera.getTransform(), *qprogram);
 
@@ -104,11 +104,10 @@ void Lighting::renderLight(Light* light)
 
 void Lighting::render()
 {
-    //GLApp::render();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDepthMask(true);
     program->use();
     scene.render(camera, *program, true);
+    qprogram->use();
     for (Light* light : scene.lights)
         renderLight(light);
 }

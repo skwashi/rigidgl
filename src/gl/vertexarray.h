@@ -1,6 +1,8 @@
 #ifndef VERTEXARRAY_H
 #define VERTEXARRAY_H
 
+#include <iostream>
+
 #include <stdlib.h>
 #include <string>
 #include <vector>
@@ -47,7 +49,7 @@ public:
     {
         glBindBuffer(GL_ARRAY_BUFFER, vboId);
         glBufferData(GL_ARRAY_BUFFER, count * sizeof(T), vertices, usage);
-        vcount = count / numComponents * sizeof(T) / sizeof(float);
+        vcount = count * sizeof(T) / (numComponents * sizeof(float));
     }
 
     template <typename T>

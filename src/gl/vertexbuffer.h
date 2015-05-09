@@ -35,15 +35,18 @@ public:
         BUFFERING = 2
     };
 
-    virtual ~VertexBuffer() {};
+    virtual ~VertexBuffer() = 0;
 
     void useIndices(bool flag);
     void setUsage(GLenum usage);
     Item getItem(uint index) const;
-    const VertexAttribs& getAttribs() const;
-    uint getItemCount() const;
-    uint getVertexSize() const;
-    bool isUsingIndices() const;
+
+    const VertexAttribs& getAttribs() const { return vertexArray.attribs; }
+    uint getVertexCount() const { return vcount; }
+    uint getIndexCount() const { return icount; }
+    uint getItemCount() const { return items.size(); }
+    uint getVertexSize() const { return vsize; }
+    bool isUsingIndices() const { return usingIndices; }
     bool isInited() const;
 
     void bind() const;
@@ -56,11 +59,17 @@ public:
 protected:
     VertexArray vertexArray;
     std::vector<Item> items;
+
     uint vsize;
+    uint vcount = 0;
+    uint icount = 0;
+
     State state = CLEAN;
     GLenum usage;
     bool usingIndices;
 };
+
+inline VertexBuffer::~VertexBuffer() {}
 
 template <typename V>
 class VBuffer : public VertexBuffer
@@ -68,10 +77,7 @@ class VBuffer : public VertexBuffer
 public:
     VBuffer(GLenum usage = GL_STATIC_DRAW);
 
-    uint getVertexCount() const;
-    uint getIndexCount() const;
-
-    void bufferData(GLenum usage);
+    virtual void bufferData(GLenum usage);
 
     void reserve(uint vcount);
     void reserve(uint vcount, uint icount);
@@ -102,8 +108,8 @@ public:
                   const std::vector<uint>& indices);
 
     void pushFloats(const float* floats, uint fcount);
-    void push(const float* floats, uint fcount,
-              const uint* indices, uint icount);
+    void pushFloats(const float* floats, uint fcount,
+                    const uint* indices, uint icount);
 
     void addTriangleI(uint v1, uint v2, uint v3);
     void addTriangleI(uint offset);
@@ -118,21 +124,12 @@ protected:
 template <typename V>
 inline VBuffer<V>::VBuffer(GLenum usage)
 {
+    setUsage(usage);
     V v;
     vertexArray.init(attribs(v));
     vsize = sizeof(V) / sizeof(float);
-}
-
-template <typename V>
-inline uint VBuffer<V>::getVertexCount() const
-{
-    return vertices.size();
-}
-
-template <typename V>
-inline uint VBuffer<V>::getIndexCount() const
-{
-    return indices.size();
+    icount = 0;
+    vcount = 0;
 }
 
 template <typename V>
@@ -173,12 +170,14 @@ template <typename V>
 inline void VBuffer<V>::clearVertices()
 {
     vertices.clear();
+    vcount = 0;
 }
 
 template <typename V>
 inline void VBuffer<V>::clearIndices()
 {
     indices.clear();
+    icount = 0;
 }
 
 template <typename V>
@@ -192,6 +191,7 @@ template <typename V>
 inline void VBuffer<V>::pushVertex(const V& vertex)
 {
     vertices.push_back(vertex);
+    vcount++;
     state = DIRTY;
 }
 
@@ -199,6 +199,7 @@ template <typename V>
 inline void VBuffer<V>::pushVertices(const V* _vertices, uint count)
 {
     vertices.insert(vertices.end(), _vertices, _vertices + count);
+    vcount += count;
     state = DIRTY;
 }
 
@@ -212,6 +213,7 @@ template <typename V>
 inline void VBuffer<V>::pushIndex(uint index)
 {
     indices.push_back(index);
+    icount++;
     state = DIRTY;
 }
 
@@ -219,6 +221,7 @@ template <typename V>
 inline void VBuffer<V>::pushIndices(const uint* _indices, uint count)
 {
     indices.insert(indices.end(), _indices, _indices + count);
+    icount += count;
     state = DIRTY;
 }
 
@@ -233,12 +236,13 @@ inline void VBuffer<V>::push(const V* _vertices, uint vcount,
                              const uint* _indices, uint icount,
                              bool createItem)
 {
-    uint vstart = getVertexCount();
-    uint istart = getIndexCount();
-    pushVertices(_vertices, vcount);
-    pushIndices(_indices, vcount);
+    uint vstart = vertices.size();
+    uint istart = indices.size();
 
-    for (int i = istart, iend = istart + icount; i < iend; i++)
+    pushVertices(_vertices, vcount);
+    pushIndices(_indices, icount);
+
+    for (int i = istart, iend = indices.size(); i < iend; i++)
         indices[i] += vstart;
 
     if (createItem) {
@@ -279,8 +283,8 @@ inline void VBuffer<V>::pushFloats(const float* floats, uint fcount)
 }
 
 template <typename V>
-inline void VBuffer<V>::push(const float* floats, uint fcount,
-                             const uint* indices, uint icount)
+inline void VBuffer<V>::pushFloats(const float* floats, uint fcount,
+                                   const uint* indices, uint icount)
 {
     push((V*) floats, fcount / vsize, indices, icount);
 }
@@ -292,6 +296,7 @@ inline void VBuffer<V>::addTriangleI(uint v1, uint v2, uint v3)
     indices.push_back(v2);
     indices.push_back(v3);
 
+    icount += 3;
     state = DIRTY;
 }
 
@@ -302,6 +307,7 @@ inline void VBuffer<V>::addTriangleI(uint offset)
     indices.push_back(offset + 1);
     indices.push_back(offset + 2);
 
+    icount += 3;
     state = DIRTY;
 }
 

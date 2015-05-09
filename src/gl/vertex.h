@@ -286,8 +286,8 @@ inline const VertexAttribs& attribs(const glm::vec3& v) { return VAS_POS3; }
 inline const VertexAttribs& attribs(const glm::vec4& v) { return VAS_POS4; }
 
 inline const VertexAttribs& attribs(const Vertex2& v) { return VAS_POS2; }
-inline const VertexAttribs& attribs(const Vertex3& v) { return VAS_POS2; }
-inline const VertexAttribs& attribs(const Vertex4& v) { return VAS_POS2; }
+inline const VertexAttribs& attribs(const Vertex3& v) { return VAS_POS3; }
+inline const VertexAttribs& attribs(const Vertex4& v) { return VAS_POS4; }
 
 inline const VertexAttribs& attribs(const Vertex2n& v) { return VAS_2N; }
 inline const VertexAttribs& attribs(const Vertex3n& v) { return VAS_3N; }
