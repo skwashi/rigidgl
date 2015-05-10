@@ -10,15 +10,15 @@ int main(int argc, char* argv[])
         int i = atoi(argv[1]);
         switch (i) {
         case 0:
-            app = new Lighting;
+            app = new Cubes;
             break;
         default:
-            app = new Cubes;
+            app = new Lighting;
             break;
         }
     }
     else {
-        app = new Cubes;
+        app = new Lighting;
     }
     app->init(640, 480);
     app->run();

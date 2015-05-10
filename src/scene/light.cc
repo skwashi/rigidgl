@@ -41,19 +41,18 @@ void Light::updateUniforms(rgl::ShaderProgram& program, int i) const
 {
     std::string prefix = i == -1 ? "light." : "light[" + std::to_string(i) + "].";
 
-
     updateCommonUniforms(prefix, program);
 
     if (type == POINT || type == SPOT) {
         if (program.hasUniform(prefix + UL_POSITION))
             program.setUniform3f(prefix + UL_POSITION,
-                                 getPosition());
+                                 getPositionW());
     }
 
     if (type == DIRECTIONAL || type == SPOT) {
         if (program.hasUniform(prefix + UL_DIRECTION))
             program.setUniform3f(prefix + UL_DIRECTION,
-                                 localToWorld(direction));
+                                 localToWorldVW(direction));
     }
 
 }
@@ -68,13 +67,13 @@ void Light::updateUniforms(const rm::Tr3& tX,
     if (type == POINT || type == SPOT) {
         if (program.hasUniform(prefix + UL_POSITION))
             program.setUniform3f(prefix + UL_POSITION,
-                                 tX.multI(getPosition()));
+                                 tX.multI(getPositionW()));
     }
 
     if (type == DIRECTIONAL || type == SPOT) {
         if (program.hasUniform(prefix + UL_DIRECTION))
             program.setUniform3f(prefix + UL_DIRECTION,
-                                 tX.multIV(localToWorldV(direction)));
+                                 tX.multIV(localToWorldVW(direction)));
     }
 
 }

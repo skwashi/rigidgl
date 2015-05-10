@@ -11,8 +11,7 @@
 #include <glm/glm.hpp>
 #include <string>
 
-#include "math/movable3.h"
-#include "math/tr3.h"
+#include "noded.h"
 #include "../gl/shaderprogram.h"
 
 const std::string UL_TYPE = "type";
@@ -25,7 +24,7 @@ const std::string UL_ATTENUATION = "attenuation";
 const std::string UL_CONEANGLE = "coneAngle";
 const std::string UL_RADIUS = "radius";
 
-class Light : public rm::Movable3
+class Light : public Noded
 {
 public:
 

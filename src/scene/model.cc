@@ -28,10 +28,7 @@ void Model::attachProgram(rgl::ShaderProgram* program)
 
 void Model::updateMatrices()
 {
-    if (node)
-        modelMatrix = node->worldTransform.toMat4();
-    else
-        modelMatrix = getTransform().toMat4();
+    modelMatrix = getWorldTransform().toMat4();
     normalMatrix = glm::mat3(modelMatrix);
     modelMatrix = glm::scale(modelMatrix, scale);
 }

@@ -24,7 +24,7 @@ void Lighting::init(int width, int height, const char* title)
 {
     GLApp::init(width, height, title);
     camera.init(45.0f, width/ (float) height, 0.01f, 200.0f);
-    camera.moveTo(0, 0, 5);
+    camera.moveTo(0, 1, 7);
 
     ShaderProgram* cprogram = createShader("normcol", VAS_POSNORMCOL);
     if (cprogram)
@@ -57,12 +57,19 @@ void Lighting::init(int width, int height, const char* title)
         scene.addModel(model);
     }
 
+    Node* axis = sceneGraph.allocateNode();
+    axis->w = vec3(0, R_PI/8, 0);
+
     Light* light = new Light(vec3(0.0001, 0.0001, 0.0001),
                              vec3(0.1f, 0.1f, 0.5f),
                              vec3(0.1f, 0.1f, 0.1f),
                              0.01f);
-    light->moveTo(-5, 1, 1);
+
     light->radius = 2;
+    light->attachNode(sceneGraph.allocateNode());
+    sceneGraph.attachNode(light->node, axis);
+    light->moveTo(-5, 1, 1);
+
     scene.addLight(light);
 
     light = new Light(vec3(0, 0, 0),
@@ -86,7 +93,7 @@ void Lighting::renderLight(Light* light)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     vec3 dx = vec3(light->radius, 0, 0);
     vec3 dy = vec3(0, light->radius, 0);
-    vec3 lightPos = camera.worldToLocal(light->getPosition());
+    vec3 lightPos = camera.worldToLocal(light->getPositionW());
 
     buffer->clear();
     buffer->pushVertex(lightPos - dx + dy);

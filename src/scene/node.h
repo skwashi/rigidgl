@@ -21,6 +21,16 @@ struct Node : public rm::Movable3
 
     rm::Tr3 worldTransform;
 
+    const rm::Tr3& getWorldTransform() const
+    {
+        return worldTransform;
+    }
+
+    rm::Tr3& getWorldTransform()
+    {
+        return worldTransform;
+    }
+
     void updateWorldTransform()
     {
         if (parent != NULL)
