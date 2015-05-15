@@ -1,6 +1,8 @@
 #include "glapp.h"
 #include "lighting.h"
 #include "cubes.h"
+#include "modelviewer.h"
+#include "cubemaps.h"
 
 int main(int argc, char* argv[])
 {
@@ -11,6 +13,12 @@ int main(int argc, char* argv[])
         switch (i) {
         case 0:
             app = new Cubes;
+            break;
+        case 1:
+            app = new ModelViewer;
+            break;
+        case 2:
+            app = new CubeMaps;
             break;
         default:
             app = new Lighting;

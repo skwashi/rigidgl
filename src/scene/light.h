@@ -13,16 +13,20 @@
 
 #include "noded.h"
 #include "../gl/shaderprogram.h"
+#include "../gl/vertexbuffer.h"
+#include "../gl/renderable.h"
 
-const std::string UL_TYPE = "type";
-const std::string UL_POSITION = "position";
-const std::string UL_DIRECTION = "direction";
-const std::string UL_AMBIENT = "ambient";
-const std::string UL_DIFFUSE = "diffuse";
-const std::string UL_SPECULAR = "specular";
-const std::string UL_ATTENUATION = "attenuation";
-const std::string UL_CONEANGLE = "coneAngle";
-const std::string UL_RADIUS = "radius";
+extern const std::string UL_TYPE;
+extern const std::string UL_POSITION;
+extern const std::string UL_DIRECTION;
+extern const std::string UL_COLOR;
+extern const std::string UL_INTENSITY;
+extern const std::string UL_AMBIENT;
+extern const std::string UL_DIFFUSE;
+extern const std::string UL_SPECULAR;
+extern const std::string UL_ATTENUATION;
+extern const std::string UL_CONEANGLE;
+extern const std::string UL_RADIUS;
 
 class Light : public Noded
 {
@@ -102,6 +106,13 @@ public:
     void updateUniforms(const rm::Tr3& tX,
                         rgl::ShaderProgram& program, int i = -1) const;
 
+    void render(rgl::ShaderProgram& program) const;
+
+    bool isEnabled() { return enabled; }
+    void enable() { enabled = true; }
+    void disable() { enabled = false; }
+    void toggle() { enabled = !enabled; }
+    
     Type type = POINT;
 
     glm::vec3 ambient;
@@ -116,6 +127,8 @@ public:
 private:
     void updateCommonUniforms(const std::string& prefix,
                               rgl::ShaderProgram& program) const;
+
+    bool enabled = true;
 
 };
 

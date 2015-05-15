@@ -5,12 +5,27 @@
  * @date 2015-05-07
  */
 
+#include <glm/glm.hpp>
+
 #include "math/movable3.h"
 #include "math/tr3.h"
 
 #include "../gl/shaderprogram.h"
+#include "../gl/vertexbuffer.h"
+#include "../gl/vertexbuffer.h"
+#include "meshes.h"
 
 #include "light.h"
+
+const std::string UL_TYPE = "type";
+const std::string UL_POSITION = "position";
+const std::string UL_DIRECTION = "direction";
+const std::string UL_AMBIENT = "ambient";
+const std::string UL_DIFFUSE = "diffuse";
+const std::string UL_SPECULAR = "specular";
+const std::string UL_ATTENUATION = "attenuation";
+const std::string UL_CONEANGLE = "coneAngle";
+const std::string UL_RADIUS = "radius";
 
 void Light::updateCommonUniforms(const std::string& prefix,
                                  rgl::ShaderProgram& program) const
@@ -77,3 +92,8 @@ void Light::updateUniforms(const rm::Tr3& tX,
     }
 
 }
+
+void Light::render(rgl::ShaderProgram& program) const {
+    rgl::getQuadBuffer()->render();
+}
+

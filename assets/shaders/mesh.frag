@@ -9,10 +9,33 @@ struct Light {
     vec3 attenuation;
 };
 
-uniform Light light;
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+};
 
-in vec3 pass_normal;
+const int ALL = ~0;
+const int LIGHT = 1 << 0;
+const int MATERIAL = 1 << 1;
+const int AMBIENT = 1 << 2;
+const int DIFFUSE = 1 << 3;
+const int SPECULAR = 1 << 4;
+const int ATTENUATION = 1 << 5;
+const int GAMMA =  1 << 6;
+const int INVERTCOLOR = 1 << 7;
+const int NORMALCOLORS = 1 << 8;
+const int STANDARD = LIGHT | MATERIAL | AMBIENT | DIFFUSE | SPECULAR | ATTENUATION | GAMMA;
+
+uniform Light light;
+uniform Material mat;
+
+uniform int u_flags;
+
 in vec3 pass_position;
+in vec3 pass_normal;
+in vec3 pass_a_normal;
 
 out vec4 FragColor;
 
@@ -34,19 +57,50 @@ float attenuation(float distance) {
 }
 
 void main() {
+
+    int flags;
+    if (u_flags == 0)
+        flags = STANDARD;
+    else
+        flags = u_flags;
+
     vec3 surf_to_light = light.position - pass_position;
     float distance = length(surf_to_light);
     vec3 L = surf_to_light / distance;
     vec3 V = normalize(-pass_position);
     vec3 N = normalize(pass_normal);
 
-    float a = attenuation(distance);
-    float secularPower = 1;
+    float a = ((flags & ATTENUATION) > 0) ? attenuation(distance) : 1;
 
-    vec3 diffusePart = a * light.diffuse * diffuse(N, L);
-    vec3 specularPart = a * light.specular * specular(N, L, V, 32);
+    vec3 linearColor = vec3(0, 0, 0);
+    if ((flags & AMBIENT) > 0) {
+        linearColor += light.ambient * mat.ambient;
+    }
 
-    vec3 gamma = vec3(1.0/2.2);
-    vec3 linearColor = light.ambient + diffusePart + specularPart;
-    FragColor = vec4(pow(linearColor, gamma), 1);
+    if ((flags & DIFFUSE) > 0) {
+        linearColor += a * light.diffuse * mat.diffuse
+            * diffuse(N, L);
+    }
+
+    if ((flags & SPECULAR) > 0) {
+        linearColor += a * light.specular * mat.specular
+            * specular(N, L, V, mat.shininess);
+    }
+
+    if ((flags & NORMALCOLORS) > 0) {
+        linearColor = 0.5 * normalize(pass_a_normal) + 0.5;
+    }
+
+    if ((flags & INVERTCOLOR) > 0) {
+        linearColor = 1 - linearColor;
+    }
+
+    vec3 out_color = linearColor;
+
+    if ((flags & GAMMA) > 0) {
+        vec3 gamma = vec3(1.0/2.2);
+        out_color = pow(linearColor, gamma);
+    }
+
+    FragColor = vec4(out_color, 1);
 }

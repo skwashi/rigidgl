@@ -15,8 +15,10 @@
 #include "../gl/shaderprogram.h"
 #include "../gl/mesh.h"
 #include "../gl/gltexture.h"
+#include "../gl/renderable.h"
+#include "material.h"
 
-class Model : public Noded
+class Model : public Noded, public rgl::Renderable
 {
 public:
     Model(rgl::Mesh* mesh) : mesh(mesh) {}
@@ -31,22 +33,28 @@ public:
           rgl::GLTexture* texture)
         : mesh(mesh), texture(texture) { attachNode(node); }
 
-    rgl::Mesh* mesh = NULL;
-    rgl::GLTexture* texture = NULL;
-    glm::vec3 scale = glm::vec3(1, 1, 1);
-    glm::mat4 modelMatrix;
-    glm::mat4 modelViewMatrix;
-    glm::mat3 normalMatrix;
+    ~Model() {}
 
-    void setTexture(rgl::GLTexture* texture);
-    void attachProgram(rgl::ShaderProgram* program);
+    rgl::GLTexture* getTexture() { return texture; }
+    rgl::Mesh* getMesh() { return mesh; }
+
+    void setMesh(rgl::Mesh* mesh) { this->mesh = mesh; }
+    void setTexture(rgl::GLTexture* texture) { this->texture = texture; }
+    void setMaterial(Material material) { this->material = material; }
+
+    // virtual in renderable
+    using rgl::Renderable::updateMatrices;
     void updateMatrices();
-    void updateMatrices(const glm::mat4& viewMatrix);
-    void render() const;
+    void updateUniforms(rgl::ShaderProgram& program) const;
     void render(rgl::ShaderProgram& program) const;
+    using rgl::Renderable::render;
+
+    glm::vec3 scale = glm::vec3(1, 1, 1);
 
 private:
-    rgl::ShaderProgram* program = NULL;
+    rgl::Mesh* mesh = NULL;
+    rgl::GLTexture* texture = NULL;
+    Material material = DEFAULT_MATERIAL;
 };
 
 

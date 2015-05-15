@@ -57,6 +57,10 @@ public:
 
     ~GLTexture();
 
+    GLuint getId() const { return textureId; }
+    GLsizei getWidth() const { return width; }
+    GLsizei getHeight() const { return height; }
+
     void setInternalFormat(GLint internalFormat);
     virtual void setParam(GLenum pname, GLint param);
     void setFilter(GLint minFilter, GLint magFilter);

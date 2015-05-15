@@ -77,8 +77,9 @@ class VBuffer : public VertexBuffer
 public:
     VBuffer(GLenum usage = GL_STATIC_DRAW);
 
-    virtual void bufferData(GLenum usage);
+    void bufferData(GLenum usage);
 
+    bool isEmpty() const { return vcount == 0; }
     void reserve(uint vcount);
     void reserve(uint vcount, uint icount);
 
@@ -113,8 +114,18 @@ public:
 
     void addTriangleI(uint v1, uint v2, uint v3);
     void addTriangleI(uint offset);
+    void addTriangleIV(uint v1, uint v2, uint v3);
+    void addTriangleIV();
+    void addTriangle(V v1, V v2, V v3);
+
     void addQuadI(uint v1, uint v2, uint v3, uint v4);
     void addQuadI(uint offset);
+    void addQuadIV(uint v1, uint v2, uint v3, uint v4);
+    void addQuadIV();
+    void addQuad(V v1, V v2, V v3, V v4);
+
+    void addPolygonI(uint offset, uint count);
+    void addPolygonIV(uint count);
 
 protected:
     std::vector<V> vertices;
@@ -312,6 +323,28 @@ inline void VBuffer<V>::addTriangleI(uint offset)
 }
 
 template <typename V>
+inline void VBuffer<V>::addTriangleIV(uint v1, uint v2, uint v3)
+{
+    addTriangleI(vcount + v1, vcount + v2, vcount + v3);
+}
+
+template <typename V>
+inline void VBuffer<V>::addTriangleIV()
+{
+    addTriangleI(vcount);
+}
+
+template <typename V>
+inline void VBuffer<V>::addTriangle(V v1, V v2, V v3)
+{
+    vertices.push_back(v1);
+    vertices.push_back(v2);
+    vertices.push_back(v3);
+    addTriangleI(vcount);
+    vcount += 3;
+}
+
+template <typename V>
 inline void VBuffer<V>::addQuadI(uint v1, uint v2, uint v3, uint v4)
 {
     addTriangleI(v1, v2, v3);
@@ -322,6 +355,47 @@ template <typename V>
 inline void VBuffer<V>::addQuadI(uint offset)
 {
     addQuadI(offset, offset + 1, offset + 2, offset + 3);
+}
+
+template <typename V>
+inline void VBuffer<V>::addQuadIV(uint v1, uint v2, uint v3, uint v4)
+{
+    addTriangleIV(v1, v2, v3);
+    addTriangleIV(v1, v3, v4);
+}
+
+template <typename V>
+inline void VBuffer<V>::addQuadIV()
+{
+    addQuadI(vcount, vcount + 1, vcount + 2, vcount + 3);
+}
+
+template <typename V>
+inline void VBuffer<V>::addQuad(V v1, V v2, V v3, V v4)
+{
+    vertices.push_back(v1);
+    vertices.push_back(v2);
+    vertices.push_back(v3);
+    vertices.push_back(v4);
+    addQuadIV();
+    vcount += 4;
+}
+
+template <typename V>
+inline void VBuffer<V>::addPolygonI(uint offset, uint count)
+{
+    for (uint i = 1; i < count - 1; i++) {
+        indices.push_back(offset);
+        indices.push_back(offset + i);
+        indices.push_back(offset + i + 1);
+    }
+    icount += 3 * (count - 2);
+}
+
+template <typename V>
+inline void VBuffer<V>::addPolygonIV(uint count)
+{
+    addPolygonI(vcount, count);
 }
 
 } // namespace

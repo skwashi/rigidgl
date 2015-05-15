@@ -13,6 +13,7 @@
 #include "camera.h"
 #include "scene/scenegraph.h"
 #include "scene/scene.h"
+#include "module.h"
 
 class InputHandler
 {
@@ -23,6 +24,8 @@ protected:
     virtual void errorCallback(int error, const char* desc) = 0;
     virtual void resizeCallback(GLFWwindow* window, int width, int height) = 0;
     virtual void cursorCallback(GLFWwindow* window, double xpos, double ypos) = 0;
+    virtual void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) = 0;
+    virtual void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) = 0;
 
     static InputHandler* handler;
 
@@ -58,11 +61,27 @@ protected:
         if (handler)
             handler->cursorCallback(window, xpos, ypos);
     }
+
+    static void mouseButtonCallbackDispatcher(GLFWwindow* window,
+                                              int button, int action, int mods)
+    {
+        if (handler)
+            handler->mouseButtonCallback(window, button, action, mods);
+    }
+
+    static void scrollCallbackDispatcher(GLFWwindow* window,
+                                         double xoffset, double yoffset)
+    {
+        if (handler)
+            handler->scrollCallback(window, xoffset, yoffset);
+    }
+
 };
 
 class GLApp : InputHandler
 {
 public:
+    friend class Module;
 
     enum State {
         INIT = 0,
@@ -88,7 +107,32 @@ public:
     void run();
     virtual void stop();
 
+    void addModule(Module* module);
+
 protected:
+
+    void initGlfw();
+    void initGLEW();
+    virtual void initGL();
+    void initPrograms();
+    void initTime();
+    void updateTime();
+    void updateFPS();
+    virtual void prepare();
+    virtual void handleInput();
+    virtual void updateCamera();
+    virtual void update();
+    virtual void prerender();
+    virtual void render();
+    virtual void cleanUp();
+    virtual void destroy();
+
+    virtual void errorCallback(int error, const char* desc);
+    virtual void resizeCallback(GLFWwindow* window, int width, int height);
+    virtual void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    virtual void cursorCallback(GLFWwindow* window, double xpos, double ypos);
+    virtual void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+    virtual void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
     State state;
     int width;
@@ -111,31 +155,7 @@ protected:
     SceneGraph sceneGraph;
     Scene scene;
 
-    void initGlfw();
-    void initGLEW();
-    virtual void initGL();
-    void initTime();
-    void updateTime();
-    void updateFPS();
-    virtual void prepare();
-    virtual void handleInput();
-    virtual void updateCamera();
-    virtual void update();
-    virtual void render();
-    virtual void cleanUp();
-    virtual void destroy();
-
-    virtual void errorCallback(int error, const char* desc);
-    virtual void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-    virtual void resizeCallback(GLFWwindow* window, int width, int height);
-    virtual void cursorCallback(GLFWwindow* window, double xpos, double ypos);
-
-    rgl::ShaderProgram* createShader(const std::string& shaderName,
-                                     const std::vector<rgl::VertexAttrib>& attribs);
-    rgl::ShaderProgram* createShader(const std::string& vertName,
-                                     const std::string& fragName,
-                                     const std::vector<rgl::VertexAttrib>& attribs);
-
+    std::vector<Module*> modules;
 };
 
 #endif

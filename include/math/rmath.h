@@ -35,6 +35,31 @@ inline bool isZero(double x)
     return (x < DBL_EPSILON && x > -DBL_EPSILON);
 }
 
+template <typename T>
+inline T clamp(T val, T min, T max)
+{
+    if (val > max)
+        return max;
+    if (val < min)
+        return min;
+    return val;
+}
+
+template <typename T>
+inline T nearest(T val, T* vals, size_t numVals)
+{
+    if (numVals < 1)
+        return val;
+
+    T best = vals[0];
+    for (size_t i = 1; i < numVals; i++) {
+        if (abs(vals[i] - val) < abs(best - val))
+            best = vals[i];
+    }
+
+    return best;
+}
+
 } //namespace
 
 

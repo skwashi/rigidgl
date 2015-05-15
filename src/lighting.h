@@ -15,16 +15,13 @@
 class Lighting : public GLApp
 {
 public:
-    virtual void init(int width, int height, const char* title = "Cubes!");
-    virtual void render();
+    void init(int width, int height, const char* title = "Cubes!");
+    void render();
 
 private:
 
-    void renderLight(Light* light);
-
     rgl::ShaderProgram* program = NULL;
     rgl::ShaderProgram* qprogram = NULL;
-    rgl::VBuffer<glm::vec3>* buffer = NULL;
 };
 
 #endif

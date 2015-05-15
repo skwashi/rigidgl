@@ -16,16 +16,6 @@
 
 using namespace rgl;
 
-void Model::setTexture(GLTexture* texture)
-{
-    this->texture = texture;
-}
-
-void Model::attachProgram(rgl::ShaderProgram* program)
-{
-    this->program = program;
-}
-
 void Model::updateMatrices()
 {
     modelMatrix = getWorldTransform().toMat4();
@@ -33,28 +23,15 @@ void Model::updateMatrices()
     modelMatrix = glm::scale(modelMatrix, scale);
 }
 
-void Model::updateMatrices(const glm::mat4& viewMatrix)
+void Model::updateUniforms(ShaderProgram& program) const
 {
-    updateMatrices();
-    modelViewMatrix = viewMatrix * modelMatrix;
-}
-
-void Model::render() const
-{
-    if (program != NULL) {
-        program->use();
-        render(*program);
-    }
+    Renderable::updateUniforms(program);
+    material.updateUniforms(program);
 }
 
 void Model::render(ShaderProgram& program) const
 {
-    if (program.hasUniform(U_MODELVIEWMATRIX))
-        program.setUniformMatrix4f(U_MODELVIEWMATRIX, modelViewMatrix);
-    if (program.hasUniform(U_NORMALMATRIX))
-        program.setUniformMatrix3f(U_NORMALMATRIX, normalMatrix);
-    if (program.hasUniform(U_MODELMATRIX))
-        program.setUniformMatrix4f(U_MODELMATRIX, modelMatrix);
+    updateUniforms(program);
     if (texture)
         texture->bind();
     if (mesh)

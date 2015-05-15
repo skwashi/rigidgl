@@ -17,7 +17,7 @@
 
 namespace {
 
-    std::string  shaderType(GLenum type) {
+    std::string shaderType(GLenum type) {
         if (type == GL_VERTEX_SHADER)
             return "GL_VERTEX_SHADER";
         else if (type == GL_FRAGMENT_SHADER)
@@ -109,6 +109,20 @@ namespace {
 }
 
 using namespace rgl;
+
+namespace rgl {
+
+const std::string U_PROJMATRIX = "u_p";
+const std::string U_VIEWMATRIX = "u_v";
+const std::string U_MODELMATRIX = "u_m";
+const std::string U_PROJVIEWMATRIX = "u_pv";
+const std::string U_MODELVIEWMATRIX = "u_mv";
+const std::string U_MVPMATRIX = "u_mvp";
+const std::string U_NORMALMATRIX = "u_normal";
+const std::string U_TEXTURESAMPLER = "u_textureSampler";
+const std::string U_FLAGS = "u_flags";
+
+}
 
 ShaderProgram::ShaderProgram()
 {

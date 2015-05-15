@@ -6,6 +6,7 @@
 #define GLM_UTILS_H
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <iostream>
 #include <sstream>
 
@@ -55,6 +56,15 @@ inline std::ostream &operator<< (std::ostream& out, const glm::vec4& v) {
 
     return out;
 }
+
+inline std::ostream &operator<< (std::ostream& out, const glm::quat& q) {
+    out << "("
+        << q.x << " " << q.y << " " << q.z << " " << q.w
+        << ")";
+
+    return out;
+}
+
 
 inline std::istream &operator>> (std::istream& is, glm::vec2& v) {
     is >> v.x; is >> v.y;

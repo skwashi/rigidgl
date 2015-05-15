@@ -12,35 +12,20 @@
 #include <glm/glm.hpp>
 
 #include "../gl/mesh.h"
+#include "../gl/vertexbuffer.h"
 
 namespace rgl {
 
-const std::vector<glm::vec3> cubeV = {
-    glm::vec3(-1, 1, 1), glm::vec3(-1, -1, 1),
-    glm::vec3(1, -1, 1), glm::vec3(1, 1, 1),
-    glm::vec3(-1, 1, -1), glm::vec3(-1, -1, -1),
-    glm::vec3(1, -1, -1), glm::vec3(1, 1, -1)
-};
+extern const std::vector<glm::vec3> cubeV;
+extern const std::vector<rgl::Face> cubeF;
 
-const std::vector<rgl::Face> cubeF = {
-    rgl::Face(0, 1, 2, 3),
-    rgl::Face(7, 6, 5, 4),
-    rgl::Face(4, 5, 1, 0),
-    rgl::Face(3, 2, 6, 7),
-    rgl::Face(4, 0, 3, 7),
-    rgl::Face(1, 5, 6, 2)
-};
+extern const std::vector<glm::vec3> quadV;
 
-inline rgl::Mesh* createCubeMesh(rgl::Mesh* mesh = NULL)
-{
-    if (mesh == NULL)
-        mesh = new rgl::MeshN();
-    mesh->addVertices(&cubeV[0], cubeV.size());
-    mesh->addFaces(&cubeF[0], cubeF.size());
-    mesh->computeFaceNormals();
-    mesh->computeVertexNormals();
-    return mesh;
-}
+extern rgl::VBuffer<glm::vec3>* quadBuffer;
+
+rgl::VBuffer<glm::vec3>* getQuadBuffer();
+
+rgl::Mesh* createCubeMesh(rgl::Mesh* mesh = NULL);
 
 } //namespace
 

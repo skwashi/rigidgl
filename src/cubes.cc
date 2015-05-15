@@ -79,8 +79,9 @@ void Cubes::init(int width, int height, const char* title)
 {
     GLApp::init(width, height, title);
 
-    camera.init(45.0f, width/ (float) height, 0.1f, 2000.0f);
+    camera.init(45.0f * DEG_TO_RAD, width/ (float) height, 0.1f, 2000.0f);
     camera.moveTo(0, 0, 150);
+
 
     // TwInit(TW_OPENGL, NULL);
     // TwWindowSize(width, height);
@@ -171,13 +172,14 @@ void Cubes::init(int width, int height, const char* title)
     GLint intFormat = bpp == 24 ? GL_RGB : GL_RGBA;
     GLenum format = bpp == 24 ? GL_BGR : GL_BGRA;
 
-    GLTexture* tex = new GLTexture(intFormat, format, wi, he, data);    GLTexture* texmip = new GLTexture(intFormat, format, wi, he, data, true);
+    GLTexture* tex = new GLTexture(intFormat, format, wi, he, data);
+    GLTexture* texmip = new GLTexture(intFormat, format, wi, he, data, true);
 
     string cubemapDir = assets::CUBEMAP_DIR + "RomeChurch/";
 
     CubeMap* cmap = createCubeMap(
         cubemapDir + "negx.png", cubemapDir + "posx.png",
-        cubemapDir + "posy.png", cubemapDir + "negy.png",
+        cubemapDir + "negy.png", cubemapDir + "posy.png",
         cubemapDir + "negz.png", cubemapDir + "posz.png");
 
     CubeMap* cm = new CubeMap(intFormat, format, wi,
@@ -285,7 +287,6 @@ void Cubes::init(int width, int height, const char* title)
 
 void Cubes::render()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDepthMask(GL_FALSE);
     skybox->render();
     glDepthMask(GL_TRUE);
@@ -302,12 +303,12 @@ void Cubes::keyCallback(GLFWwindow* window, int key, int scancode, int action, i
     GLApp::keyCallback(window, key, scancode, action, mods);
 
     if (key == GLFW_KEY_O && action == GLFW_PRESS) {
-        scene.models[3]->texture->bind();
+        scene.models[3]->getTexture()->bind();
         if (mipmap) {
-            scene.models[3]->texture->setFilter(GL_LINEAR, GL_LINEAR);
+            scene.models[3]->getTexture()->setFilter(GL_LINEAR, GL_LINEAR);
 
         } else {
-            scene.models[3]->texture->setFilter(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+            scene.models[3]->getTexture()->setFilter(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
         }
         mipmap = !mipmap;
         if (program == &tprogram)

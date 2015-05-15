@@ -20,6 +20,8 @@ struct Vertex2
 
     static const uint numFloats = 2;
     static const VertexAttribs& attribs;
+
+    float& operator[](size_t i) { return ((float*) this)[i]; }
 };
 
 struct Vertex3

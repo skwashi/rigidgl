@@ -27,6 +27,11 @@ public:
     Skybox(rgl::CubeMap* cubemap);
     ~Skybox() { delete mesh; }
 
+    void setCubeMap(rgl::CubeMap* cubemap)
+    {
+        this->cubemap = cubemap;
+    }
+
     rgl::ShaderProgram& getProgram()
     {
         return program;
@@ -53,7 +58,8 @@ inline Skybox::Skybox(rgl::CubeMap* cubemap)
 inline void Skybox::render()
 {
     program.use();
-    cubemap->bind();
+    if (cubemap)
+        cubemap->bind();
     mesh->render();
 }
 

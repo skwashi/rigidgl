@@ -25,6 +25,8 @@ CubeMap* createCubeMap(const std::string& negX, const std::string& posX,
                        const std::string& negY, const std::string& posY,
                        const std::string& negZ, const std::string& posZ, bool mipmap = false);
 
+CubeMap* createCubeMapD(const std::string& dir, bool mipmap = false);
+
 CubeMap* createCubeMap(const std::string* filenames, bool mipmap = false);
 
 CubeMap* createCubeMap(const CubeMapLayout& layout,

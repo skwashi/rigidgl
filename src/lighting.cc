@@ -9,9 +9,11 @@
 #include <GL/glew.h>
 
 #include "lighting.h"
+#include "scene/light.h"
 #include "assets.h"
 #include "rutils.h"
 #include "gl/rgl.h"
+#include "scene/meshes.h"
 
 using namespace std;
 using namespace rgl;
@@ -20,17 +22,18 @@ using glm::vec2;
 using glm::vec3;
 using glm::vec4;
 
+
 void Lighting::init(int width, int height, const char* title)
 {
     GLApp::init(width, height, title);
-    camera.init(45.0f, width/ (float) height, 0.01f, 200.0f);
+    camera.init(45.0f * DEG_TO_RAD, width/ (float) height, 0.01f, 200.0f);
     camera.moveTo(0, 1, 7);
 
-    ShaderProgram* cprogram = createShader("normcol", VAS_POSNORMCOL);
+    ShaderProgram* cprogram = ShaderPrograms::createShader("normcol", VAS_POSNORMCOL);
     if (cprogram)
         pipeline.watchProgram(*cprogram);
 
-    program = createShader("mesh", VAS_POSNORM);
+    program = ShaderPrograms::createShader("mesh", VAS_POSNORM);
     if (program)
         pipeline.watchProgram(program);
 
@@ -80,41 +83,11 @@ void Lighting::init(int width, int height, const char* title)
     light->radius = 1;
     scene.addLight(light);
 
-    buffer = new VBuffer<vec3>(GL_STREAM_DRAW);
-
-    qprogram = createShader("lightsphere", VAS_3);
-        if (qprogram)
-        pipeline.watchProgram(qprogram);
-
-}
-
-void Lighting::renderLight(Light* light)
-{
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    vec3 dx = vec3(light->radius, 0, 0);
-    vec3 dy = vec3(0, light->radius, 0);
-    vec3 lightPos = camera.worldToLocal(light->getPositionW());
-
-    buffer->clear();
-    buffer->pushVertex(lightPos - dx + dy);
-    buffer->pushVertex(lightPos - dx - dy);
-    buffer->pushVertex(lightPos + dx - dy);
-    buffer->pushVertex(lightPos + dx + dy);
-    buffer->addQuadI(0);
-    qprogram->use();
-    light->updateUniforms(camera.getTransform(), *qprogram);
-
-    glDepthMask(false);
-    buffer->render();
-    glDepthMask(true);
+    pipeline.watchProgram(ShaderPrograms::lightSphere);
 }
 
 void Lighting::render()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    program->use();
     scene.render(camera, *program, true);
-    qprogram->use();
-    for (Light* light : scene.lights)
-        renderLight(light);
+    scene.renderLights(camera, *ShaderPrograms::lightSphere);
 }

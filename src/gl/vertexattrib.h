@@ -25,15 +25,6 @@ const std::string A_COLOR = "a_color";
 const std::string A_NORMAL = "a_normal";
 const std::string A_TEXCOORD = "a_texCoord";
 
-const std::string U_PROJMATRIX = "u_p";
-const std::string U_VIEWMATRIX = "u_v";
-const std::string U_MODELMATRIX = "u_m";
-const std::string U_PROJVIEWMATRIX = "u_pv";
-const std::string U_MODELVIEWMATRIX = "u_mv";
-const std::string U_MVPMATRIX = "u_mvp";
-const std::string U_NORMALMATRIX = "u_normal";
-const std::string U_TEXTURESAMPLER = "u_textureSampler";
-
 const VertexAttrib VA_POS2 = {A_POSITION, 0, 2};
 const VertexAttrib VA_POS3 = {A_POSITION, 0, 3};
 const VertexAttrib VA_POS4 = {A_POSITION, 0, 4};

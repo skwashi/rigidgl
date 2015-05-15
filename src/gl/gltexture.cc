@@ -16,6 +16,8 @@ GLTexture::GLTexture(GLint internalFormat, GLsizei width, GLsizei height, GLint 
     this->height = height;
     glGenTextures(1, &textureId);
     bind();
+    setPackUnpackAlignment();
+    bufferData(NULL);
     setFilter(filter, filter);
     setWrap(wrap);
 }

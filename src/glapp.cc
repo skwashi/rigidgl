@@ -33,6 +33,7 @@ void GLApp::init(int width, int height, const char* title)
     initGlfw();
     initGLEW();
     initGL();
+    initPrograms();
     FreeImage_Initialise();
     state = INIT;
 }
@@ -47,10 +48,21 @@ void GLApp::run()
         prepare();
         glfwPollEvents();
         handleInput();
+        for (Module* module : modules)
+            if (module->isEnabled())
+                module->handleInput();
         updateCamera();
-        if (state != PAUSED)
+        if (state != PAUSED) {
             update();
+            for (Module* module : modules)
+                if (module->isEnabled())
+                    module->update();
+        }
+        prerender();
         render();
+        for (Module* module : modules)
+            if (module->isEnabled())
+                module->render();
         glfwSwapBuffers(window);
         cleanUp();
     }
@@ -62,6 +74,11 @@ void GLApp::run()
 void GLApp::stop()
 {
     state = STOPPED;
+}
+
+void GLApp::addModule(Module* module)
+{
+    modules.push_back(module);
 }
 
 void GLApp::initGlfw()
@@ -80,6 +97,8 @@ void GLApp::initGlfw()
     glfwSetKeyCallback(window, InputHandler::keyCallbackDispatcher);
     glfwSetWindowSizeCallback(window, InputHandler::resizeCallbackDispatcher);
     glfwSetCursorPosCallback(window, InputHandler::cursorCallbackDispatcher);
+    glfwSetMouseButtonCallback(window, InputHandler::mouseButtonCallbackDispatcher);
+    glfwSetScrollCallback(window, InputHandler::scrollCallbackDispatcher);
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
@@ -104,10 +123,16 @@ void GLApp::initGL()
     glClearColor(0, 0, 0, 1);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glEnable (GL_BLEND);
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
+void GLApp::initPrograms()
+{
+    bool success = ShaderPrograms::initPrograms();
+    if (!success) {
+        std::cerr << "Error initializing ShaderPrograms" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}
 void GLApp::initTime()
 {
     timeStamp = prevTime = time = glfwGetTime();
@@ -196,9 +221,13 @@ void GLApp::update()
     scene.updateMatrices();
 }
 
-void GLApp::render()
+void GLApp::prerender()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void GLApp::render()
+{
     scene.render();
 }
 
@@ -216,6 +245,14 @@ void GLApp::errorCallback(int error, const char* desc)
     cerr << desc;
 }
 
+void GLApp::resizeCallback(GLFWwindow* window, int width, int height)
+{
+    this->width = width;
+    this->height = height;
+    camera.setAspectRatio(width / (float) height);
+    glViewport(0, 0, width, height);
+}
+
 void GLApp::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -230,41 +267,14 @@ void GLApp::keyCallback(GLFWwindow* window, int key, int scancode, int action, i
     }
 }
 
-void GLApp::resizeCallback(GLFWwindow* window, int width, int height)
-{
-    this->width = width;
-    this->height = height;
-    camera.setAspectRatio(width / (float) height);
-    glViewport(0, 0, width, height);
-}
-
 void GLApp::cursorCallback(GLFWwindow* window, double xpos, double ypos)
 {
 }
 
-rgl::ShaderProgram* GLApp::createShader(const std::string& shaderName,
-                                        const vector<VertexAttrib>& attribs)
+void GLApp::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-    return createShader(shaderName + ".vert", shaderName + ".frag",
-                        attribs);
 }
 
-rgl::ShaderProgram* GLApp::createShader(const std::string& vertName,
-                                        const std::string& fragName,
-                                        const vector<VertexAttrib>& attribs)
+void GLApp::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    string vertSrc = rutils::readFile(
-        assets::SHADER_DIR + vertName);
-    string fragSrc = rutils::readFile(
-        assets::SHADER_DIR + fragName);
-
-    ShaderProgram* program = new ShaderProgram;
-    bool success = program->create(vertSrc, fragSrc, attribs);
-
-    if (success) {
-        return program;
-    } else {
-        delete program;
-        return NULL;
-    }
 }

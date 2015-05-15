@@ -37,6 +37,13 @@ CubeMap* createCubeMap(const std::string& negX, const std::string& posX,
     return createCubeMap(filenames, mipmap);
 }
 
+CubeMap* createCubeMapD(const std::string& dir, bool mipmap)
+{
+    return createCubeMap(dir + "negx.png", dir + "posx.png",
+                         dir + "negy.png", dir + "posy.png",
+                         dir + "negz.png", dir + "posz.png");
+}
+
 CubeMap* createCubeMap(const std::string* filenames, bool mipmap)
 {
     const char* fname = filenames[0].c_str();
@@ -60,6 +67,7 @@ CubeMap* createCubeMap(const std::string* filenames, bool mipmap)
     CubeMap* cubeMap = new CubeMap(bpp == 24 ? GL_RGB : GL_RGBA,
                                    size);
 
+    FreeImage_FlipVertical(bitmap);
     byte* bits = FreeImage_GetBits(bitmap);
     cubeMap->bufferData(CubeMap::SIDES[0], bpp == 24 ? GL_BGR : GL_BGRA, bits);
 
@@ -68,6 +76,7 @@ CubeMap* createCubeMap(const std::string* filenames, bool mipmap)
         bitmap = rutils::loadImage(fname);
         if (!bitmap)
             return NULL;
+        FreeImage_FlipVertical(bitmap);
         width = FreeImage_GetWidth(bitmap);
         height = FreeImage_GetHeight(bitmap);
         if (width != size || height != size) {

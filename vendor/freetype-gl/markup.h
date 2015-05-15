@@ -55,9 +55,9 @@ extern "C" {
  *
  * ...
  *
- * vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
- * vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
- * vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+ * glm::vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
+ * glm::vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
+ * glm::vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
  *
  * markup_t normal = {
  *     .family  = "Droid Serif",

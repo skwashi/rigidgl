@@ -16,9 +16,35 @@
 
 namespace rgl {
 
+extern const std::string U_PROJMATRIX; //= "u_p";
+extern const std::string U_VIEWMATRIX; //= "u_v";
+extern const std::string U_MODELMATRIX; //= "u_m";
+extern const std::string U_PROJVIEWMATRIX; //= "u_pv";
+extern const std::string U_MODELVIEWMATRIX; //= "u_mv";
+extern const std::string U_MVPMATRIX; //= "u_mvp";
+extern const std::string U_NORMALMATRIX; //= "u_normal";
+extern const std::string U_TEXTURESAMPLER; //= "u_textureSampler";
+extern const std::string U_FLAGS; // = "u_flags"
+
 class ShaderProgram
 {
 public:
+
+    enum SHADER_FLAGS
+    {
+        ALL = ~0,
+        LIGHT = 1 << 0,
+        MATERIAL = 1 << 1,
+        AMBIENT = 1 << 2,
+        DIFFUSE = 1 << 3,
+        SPECULAR = 1 << 4,
+        ATTENUATION = 1 << 5,
+        GAMMA = 1 << 6,
+        INVERTCOLOR = 1 << 7,
+        NORMALCOLORS = 1 << 8,
+        STANDARD = LIGHT | AMBIENT | DIFFUSE | SPECULAR | ATTENUATION | GAMMA,
+        BASE = LIGHT | MATERIAL
+    };
 
     ShaderProgram();
     ~ShaderProgram();
@@ -34,7 +60,7 @@ public:
                  const std::string& fragSource,
                  const VertexAttrib* attribs, int count);
 
-    bool isValid() const; 
+    bool isValid() const;
     void use() const;
     void disable() const;
     GLuint getId() const;
@@ -42,6 +68,39 @@ public:
     bool hasUniform(const std::string& name) const;
     GLint getAttribLocation(const std::string& name) const;
     GLint getUniformLocation(const std::string& name) const;
+
+    int getFlags() { return flags; }
+
+    void setFlags(int flags) {
+        if (flags != this->flags) {
+            this->flags = flags;
+            flagsChanged = true;
+        }
+    }
+
+    void addFlags(int flag)
+    {
+        int oldFlags = flags;
+        flags |= flag;
+        if (flags != oldFlags)
+            flagsChanged = true;
+    }
+
+    void removeFlags(int flag)
+    {
+        int oldFlags = flags;
+        flags &= !flag;
+        if (flags != oldFlags)
+            flagsChanged = true;
+    }
+
+    void setUniformFlags()
+    {
+        if (flagsChanged && hasUniform(U_FLAGS)) {
+            setUniform1i(U_FLAGS, flags);
+            flagsChanged = false;
+        }
+    }
 
     // uniform setters
 
@@ -79,6 +138,11 @@ public:
                             bool transpose = false);
 
 private:
+    bool compile();
+    bool link();
+    void cacheAttribs();
+    void cacheUniforms();
+
     GLuint programId;
     std::string vertSource;
     std::string fragSource;
@@ -87,10 +151,8 @@ private:
     std::unordered_map<std::string, int> attribs;
     std::unordered_map<std::string, int> uniforms;
 
-    bool compile();
-    bool link();
-    void cacheAttribs();
-    void cacheUniforms();
+    int flags = SHADER_FLAGS::STANDARD;
+    bool flagsChanged = true;
 };
 
 }

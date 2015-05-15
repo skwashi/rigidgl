@@ -55,6 +55,16 @@ public:
         return getTransform().q;
     }
 
+    glm::vec3 getLocalPosition(const Tr3& tX) const
+    {
+        return tX.multI(getTransform().p);
+    }
+
+    glm::vec3 getLocalPosition(const Movable3& other) const
+    {
+        return other.worldToLocal(getTransform().p);
+    }
+
     void translate(const glm::vec3& v)
     {
         getTransform().addTranslation(v);
@@ -151,7 +161,7 @@ public:
         moved = true;
     }
 
-    void setRotation(float angle, const glm::quat& q)
+    void setRotation(const glm::quat& q)
     {
         getTransform().setRotation(q);
         moved = true;
@@ -213,6 +223,11 @@ public:
     glm::vec3 worldToLocalV(const glm::vec3& v) const
     {
         return getTransform().multIV(v);
+    }
+
+    glm::mat4 getMat4() const
+    {
+        return getTransform().toMat4();
     }
 
 protected:

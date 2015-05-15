@@ -11,5 +11,5 @@ out vec3 pass_texCoord;
 
 void main() {
      gl_Position = u_p * u_v * u_m * vec4(a_position, 1);
-     pass_texCoord = a_position * vec3(1, -1, 1);
+     pass_texCoord = a_position;
 }

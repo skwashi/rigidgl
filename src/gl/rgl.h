@@ -12,6 +12,7 @@
 #include "mesh.h"
 #include "pipeline.h"
 #include "shaderprogram.h"
+#include "shaderprograms.h"
 #include "textureutils.h"
 #include "vertexarray.h"
 #include "vertexattrib.h"
