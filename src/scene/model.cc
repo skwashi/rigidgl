@@ -29,7 +29,7 @@ void Model::updateUniforms(ShaderProgram& program) const
     material.updateUniforms(program);
 }
 
-void Model::render(ShaderProgram& program) const
+void Model::render(ShaderProgram& program)
 {
     updateUniforms(program);
     if (texture)

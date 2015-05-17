@@ -156,6 +156,10 @@ protected:
     Scene scene;
 
     std::vector<Module*> modules;
+
+    struct {
+        float cameraSpeed = 20;
+    } _settings;
 };
 
 #endif

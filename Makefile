@@ -8,7 +8,7 @@ BUILDDIR=build
 CFLAGS=-g -Wall
 CCFLAGS=-g -Wall -std=c++11
 INCS=-Iinclude -I/usr/include/freetype2 -Ivendor/freetype-gl
-LIBS=-lGL -lGLEW -lglfw -lfreeimage -lAntTweakBar -lfreetype
+LIBS=-lGL -lGLEW -lglfw -lfreeimage -lAntTweakBar -lfreetype -lnoise
 
 GLSRC=$(wildcard $(SRCDIR)/gl/*.cc)
 SCENESRC=$(wildcard $(SRCDIR)/scene/*.cc)

@@ -112,9 +112,11 @@ public:
     void enable() { enabled = true; }
     void disable() { enabled = false; }
     void toggle() { enabled = !enabled; }
-    
+
     Type type = POINT;
 
+    glm::vec3 color;
+    glm::vec3 intensity;
     glm::vec3 ambient;
     glm::vec3 diffuse;
     glm::vec3 specular;

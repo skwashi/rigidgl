@@ -1,6 +1,7 @@
 #include "glapp.h"
 #include "lighting.h"
 #include "cubes.h"
+#include "terraintest.h"
 #include "modelviewer.h"
 #include "cubemaps.h"
 
@@ -19,6 +20,9 @@ int main(int argc, char* argv[])
             break;
         case 2:
             app = new CubeMaps;
+            break;
+        case 3:
+            app = new TerrainTest;
             break;
         default:
             app = new Lighting;

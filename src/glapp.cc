@@ -181,7 +181,7 @@ void GLApp::handleInput()
     cursor.x = xpos;
     cursor.y = ypos;
 
-    float ds = 10;
+    float ds = _settings.cameraSpeed;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.translateLocally(0, ds * dt, 0);

@@ -67,9 +67,9 @@ public:
             program.setUniformMatrix4f(U_MODELMATRIX, modelMatrix);
     }
 
-    virtual void render(ShaderProgram& program) const = 0;
+    virtual void render(ShaderProgram& program) = 0;
 
-    virtual void render() const
+    virtual void render()
     {
         if (program != NULL) {
             program->use();

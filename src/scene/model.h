@@ -46,7 +46,7 @@ public:
     using rgl::Renderable::updateMatrices;
     void updateMatrices();
     void updateUniforms(rgl::ShaderProgram& program) const;
-    void render(rgl::ShaderProgram& program) const;
+    void render(rgl::ShaderProgram& program);
     using rgl::Renderable::render;
 
     glm::vec3 scale = glm::vec3(1, 1, 1);

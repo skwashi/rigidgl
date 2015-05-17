@@ -46,8 +46,8 @@ public:
 
     using rgl::Renderable::updateMatrices;
     void updateMatrices();
-    virtual void render(rgl::ShaderProgram& program) const;
-    virtual void render() const;
+    virtual void render(rgl::ShaderProgram& program);
+    virtual void render();
 
 protected:
     virtual void bind() const;
@@ -111,7 +111,7 @@ inline void Batch<V>::updateMatrices()
 }
 
 template <typename V>
-inline void Batch<V>::render(rgl::ShaderProgram& program) const
+inline void Batch<V>::render(rgl::ShaderProgram& program)
 {
     bind();
     updateUniforms(program);
@@ -119,7 +119,7 @@ inline void Batch<V>::render(rgl::ShaderProgram& program) const
 }
 
 template <typename V>
-inline void Batch<V>::render() const
+inline void Batch<V>::render()
 {
     if (program != NULL) {
         program->use();
