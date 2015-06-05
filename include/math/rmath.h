@@ -12,6 +12,7 @@
 
 #define R_EPSILON FLT_EPSILON
 #define R_PI 3.14159265359f
+#define R_TAU 6.28318530718f
 #define DEG_TO_RAD (R_PI / 180.0f)
 #define RAD_TO_DEG (180.0f / R_PI)
 
