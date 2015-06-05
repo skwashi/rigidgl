@@ -15,6 +15,7 @@
 #include "gl/mesh.h"
 #include "gl/shaderprogram.h"
 #include "gl/cubemap.h"
+#include "gl/framebuffer.h"
 #include "scene/model.h"
 #include "scene/light.h"
 #include "scene/material.h"
@@ -45,6 +46,7 @@ private:
     void initLights();
     void initMeshes();
     void initCubeMaps();
+    void initFrameBuffer();
 
     struct
     {
@@ -89,7 +91,6 @@ private:
     Material material;
     rgl::ShaderProgram* program;
     Skybox* skybox;
-
 };
 
 #endif

@@ -22,6 +22,7 @@ extern const std::vector<rgl::Face> cubeF;
 extern const std::vector<glm::vec3> quadV;
 
 extern rgl::VBuffer<glm::vec3>* quadBuffer;
+extern rgl::VBuffer<rgl::Vertex3t>* quadBufferT;
 
 rgl::VBuffer<glm::vec3>* getQuadBuffer();
 

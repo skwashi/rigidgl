@@ -4,14 +4,63 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <iostream>
 
 #include "gltexture.h"
 
 using namespace rgl;
 
+GLenum GLTexture::defaultFormat(GLint internalFormat)
+{
+    GLint f = internalFormat;
+
+    if (f == GL_R8 || f == GL_R8_SNORM || f == GL_R16F || f == GL_R32F)
+        return GL_RED;
+
+    if (f == GL_R8UI || f == GL_R8I || f == GL_R16UI || f == GL_R16I
+        || f == GL_R32UI || f == GL_R32I)
+        return GL_RED_INTEGER;
+
+    if (f == GL_RG8 || f == GL_RG8_SNORM || f == GL_RG16F || f == GL_RG32F)
+        return GL_RG;
+
+    if (f == GL_RG8UI || f == GL_RG8I || f == GL_RG16UI || f == GL_RG16I
+        || f == GL_RG32UI || f == GL_RG32I)
+        return GL_RG_INTEGER;
+
+    if (f == GL_RGB8 || f == GL_SRGB8 || f == GL_RGB565
+        || f == GL_RGB8_SNORM || f == GL_R11F_G11F_B10F
+        || f == GL_RGB9_E5 || f == GL_RGB16F || f == GL_RGB32F)
+        return GL_RGB;
+
+    if (f == GL_RGB8UI || f == GL_RGB8I || f == GL_RGB16UI
+        || f ==GL_RGB16I || f == GL_RGB32UI || f == GL_RGB32I)
+        return GL_RGB_INTEGER;
+
+    if (f == GL_RGBA || f == GL_RGBA8 || f == GL_SRGB8_ALPHA8
+        || f == GL_RGBA8_SNORM || f == GL_RGB5_A1 || f == GL_RGBA4
+        || f == GL_RGB10_A2 || f == GL_RGBA16F || f == GL_RGBA32F)
+        return GL_RGBA;
+
+    if (f == GL_RGBA8UI || f == GL_RGBA8I || f == GL_RGB10_A2UI
+        || f == GL_RGBA16UI || f == GL_RGBA16I || f == GL_RGBA32I
+        || f == GL_RGBA32UI)
+        return GL_RGBA_INTEGER;
+
+    if (f == GL_DEPTH_COMPONENT16 || f == GL_DEPTH_COMPONENT24
+        || f == GL_DEPTH_COMPONENT32F || f == GL_DEPTH_COMPONENT32)
+        return GL_DEPTH_COMPONENT;
+
+    if (f == GL_DEPTH24_STENCIL8 || f == GL_DEPTH32F_STENCIL8)
+        return GL_DEPTH_STENCIL;
+
+    return f;
+}
+
 GLTexture::GLTexture(GLint internalFormat, GLsizei width, GLsizei height, GLint filter, GLint wrap)
 {
     this->internalFormat = internalFormat;
+    this->format = defaultFormat(internalFormat);
     this->width = width;
     this->height = height;
     glGenTextures(1, &textureId);
@@ -22,15 +71,17 @@ GLTexture::GLTexture(GLint internalFormat, GLsizei width, GLsizei height, GLint 
     setWrap(wrap);
 }
 
-GLTexture::GLTexture(GLint internalFormat, GLenum format, GLsizei width, GLsizei height, const GLvoid* data, bool mipmap, GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT)
+GLTexture::GLTexture(GLint internalFormat, GLenum format, GLenum type, GLsizei width, GLsizei height, const GLvoid* data, bool mipmap, GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT)
 {
     this->internalFormat = internalFormat;
+    this->format = format;
+    this->type = type;
     this->width = width;
     this->height = height;
     glGenTextures(1, &textureId);
     bind();
     setPackUnpackAlignment();
-    bufferData(format, data);
+    bufferData(format, type, data);
     if (mipmap)
         generateMipmap();
     setFilter(minFilter, magFilter);
@@ -42,6 +93,14 @@ GLTexture::~GLTexture()
     if (textureId != 0)
         glDeleteTextures(1, &textureId);
     textureId = 0;
+}
+
+void GLTexture::resize(GLsizei width, GLsizei height)
+{
+    this->width = width;
+    this->height = height;
+    bind();
+    bufferData(NULL);
 }
 
 void GLTexture::setInternalFormat(GLint internalFormat)
@@ -107,12 +166,12 @@ void GLTexture::bind()
 
 void GLTexture::bufferData(const GLvoid* data)
 {
-    bufferData(DEFAULT_FORMAT, DEFAULT_TYPE, data);
+    bufferData(format, type, data);
 }
 
 void GLTexture::bufferData(GLenum format, const GLvoid* data)
 {
-    bufferData(format, DEFAULT_TYPE, data);
+    bufferData(format, type, data);
 }
 
 void GLTexture::bufferData(GLenum format, GLenum type, const GLvoid* data)

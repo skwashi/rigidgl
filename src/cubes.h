@@ -10,17 +10,16 @@
 #include <memory>
 
 #include "glapp.h"
-#include "gl/mesh.h"
-#include "gl/shaderprogram.h"
-#include "gl/gltexture.h"
+#include "gl/rgl.h"
+#include "graphics/batch.h"
 #include "scene/skybox.h"
 
 class Cubes : public GLApp
 {
 public:
-    virtual void init(int width, int height, const char* title = "Cubes!");
-    virtual void render();
-    virtual void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    void init(int width, int height, const char* title = "Cubes!");
+    void render();
+    void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 private:
     rgl::VertexBuffer* textVB;
@@ -33,6 +32,7 @@ private:
     Skybox* skybox;
     bool mipmap = true;
 
+    rgraphics::Batch<rgl::Vertex2t>* vbuf;
 };
 
 #endif

@@ -17,6 +17,7 @@
 #include "glapp.h"
 #include "camera.h"
 #include "gl/shaderprogram.h"
+#include "gl/framebuffer.h"
 #include "scene/skybox.h"
 #include "scene/material.h"
 

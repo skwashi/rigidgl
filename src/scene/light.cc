@@ -20,8 +20,6 @@
 const std::string UL_TYPE = "type";
 const std::string UL_POSITION = "position";
 const std::string UL_DIRECTION = "direction";
-const std::string UL_COLOR = "color";
-const std::string UL_INTENSITY = "intensity";
 const std::string UL_AMBIENT = "ambient";
 const std::string UL_DIFFUSE = "diffuse";
 const std::string UL_SPECULAR = "specular";
@@ -34,12 +32,6 @@ void Light::updateCommonUniforms(const std::string& prefix,
 {
     if (program.hasUniform(prefix + UL_TYPE))
         program.setUniform1i(prefix + UL_TYPE, type);
-
-    if (program.hasUniform(prefix + UL_COLOR))
-        program.setUniform3f(prefix + UL_COLOR, color);
-
-    if (program.hasUniform(prefix + UL_INTENSITY))
-        program.setUniform3f(prefix + UL_COLOR, intensity);
 
     if (program.hasUniform(prefix + UL_AMBIENT))
         program.setUniform3f(prefix + UL_AMBIENT, ambient);
@@ -66,7 +58,7 @@ void Light::updateUniforms(rgl::ShaderProgram& program, int i) const
 
     updateCommonUniforms(prefix, program);
 
-    if (type == POINT || type == SPOT) {
+    if (type == POINT || type == SPOT || type == DIRECTIONAL) {
         if (program.hasUniform(prefix + UL_POSITION))
             program.setUniform3f(prefix + UL_POSITION,
                                  getPositionW());
@@ -87,7 +79,7 @@ void Light::updateUniforms(const rm::Tr3& tX,
 
     updateCommonUniforms(prefix, program);
 
-    if (type == POINT || type == SPOT) {
+    if (type == POINT || type == SPOT || type == DIRECTIONAL) {
         if (program.hasUniform(prefix + UL_POSITION))
             program.setUniform3f(prefix + UL_POSITION,
                                  tX.multI(getPositionW()));

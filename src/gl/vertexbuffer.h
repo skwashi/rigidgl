@@ -123,6 +123,7 @@ public:
     void addQuadIV(uint v1, uint v2, uint v3, uint v4);
     void addQuadIV();
     void addQuad(V v1, V v2, V v3, V v4);
+    uint pushQuad(V v1, V v2, V v3, V v4);
 
     void addPolygonI(uint offset, uint count);
     void addPolygonIV(uint count);
@@ -379,6 +380,14 @@ inline void VBuffer<V>::addQuad(V v1, V v2, V v3, V v4)
     vertices.push_back(v4);
     addQuadIV();
     vcount += 4;
+}
+
+template <typename V>
+inline uint VBuffer<V>::pushQuad(V v1, V v2, V v3, V v4)
+{
+    V vertices[4] = {v1, v2, v3, v4};
+    uint indices[6] = {0, 1, 2, 0, 2, 3};
+    return pushItem(vertices, 4, indices, 6);
 }
 
 template <typename V>

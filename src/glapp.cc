@@ -25,8 +25,11 @@ using namespace glm;
 
 InputHandler* InputHandler::handler;
 
+GLApp* GLApp::instance = NULL;
+
 void GLApp::init(int width, int height, const char* title)
 {
+    GLApp::instance = this;
     this->title = title;
     this->width = width;
     this->height = height;
@@ -34,6 +37,7 @@ void GLApp::init(int width, int height, const char* title)
     initGLEW();
     initGL();
     initPrograms();
+    initBuffers();
     FreeImage_Initialise();
     state = INIT;
 }
@@ -133,11 +137,19 @@ void GLApp::initPrograms()
         exit(EXIT_FAILURE);
     }
 }
+
+void GLApp::initBuffers()
+{
+    vbuffer3t = new VBuffer<Vertex3t>();
+}
+
 void GLApp::initTime()
 {
     timeStamp = prevTime = time = glfwGetTime();
     fps = frameCount = 0;
     dt = 0;
+    wdt = 0;
+    worldTime = 0;
 }
 
 void GLApp::updateTime()
@@ -145,8 +157,11 @@ void GLApp::updateTime()
     prevTime = time;
     time = glfwGetTime();
     dt = time - prevTime;
-    if (state != PAUSED)
+    wdt = timeScale * dt;
+    if (state != PAUSED) {
         runningTime += dt;
+        worldTime += wdt;
+    }
 }
 
 void GLApp::updateFPS()
@@ -155,6 +170,7 @@ void GLApp::updateFPS()
         fps = frameCount;
         frameCount = 0;
         timeStamp = time;
+        glfwSetWindowTitle(window, (to_string(fps) + "fps").c_str());
     }
     frameCount++;
 }
@@ -217,7 +233,7 @@ void GLApp::updateCamera()
 
 void GLApp::update()
 {
-    sceneGraph.updateTransforms(dt);
+    sceneGraph.updateTransforms(wdt);
     scene.updateMatrices();
 }
 
@@ -251,6 +267,9 @@ void GLApp::resizeCallback(GLFWwindow* window, int width, int height)
     this->height = height;
     camera.setAspectRatio(width / (float) height);
     glViewport(0, 0, width, height);
+    if (gbuffer) {
+        gbuffer->resize(width, height);
+    }
 }
 
 void GLApp::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -264,6 +283,10 @@ void GLApp::keyCallback(GLFWwindow* window, int key, int scancode, int action, i
             state = PAUSED;
         else if (state == PAUSED)
             state = RUNNING;
+    }
+
+    if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9 && action == GLFW_PRESS) {
+        toggles[key - GLFW_KEY_0] = !toggles[key - GLFW_KEY_0];
     }
 }
 

@@ -16,11 +16,29 @@
 namespace rgl {
 namespace ShaderPrograms {
 
+const std::string version130 = "#version 130\n";
+
 ShaderProgram* lightSphere = NULL;
 ShaderProgram* mesh = NULL;
 ShaderProgram* cubeMap = NULL;
 ShaderProgram* reflect = NULL;
 ShaderProgram* reflectL = NULL;
+ShaderProgram* terrain = NULL;
+ShaderProgram* terrainL = NULL;
+ShaderProgram* depth = NULL;
+ShaderProgram* depthUI = NULL;
+ShaderProgram* normalUI = NULL;
+ShaderProgram* positionUI = NULL;
+ShaderProgram* UI = NULL;
+ShaderProgram* gpmaterial = NULL;
+ShaderProgram* gpterrain = NULL;
+ShaderProgram* lightPass = NULL;
+
+ShaderProgram* createShader(const ShaderDef& shaderDef)
+{
+    return createShader(shaderDef.vertFiles, shaderDef.fragFiles,
+                        shaderDef.attribs);
+}
 
 ShaderProgram* createShader(const std::string& shaderName,
                             const std::vector<VertexAttrib>& attribs)
@@ -33,23 +51,47 @@ ShaderProgram* createShader(const std::string& vertName,
                             const std::string& fragName,
                             const std::vector<VertexAttrib>& attribs)
 {
-    std::string vertSrc = rutils::readFile(
-        assets::SHADER_DIR + vertName);
-    std::string fragSrc = rutils::readFile(
-        assets::SHADER_DIR + fragName);
+    return createShader(&vertName, 1, &fragName, 1, attribs);
+}
+
+ShaderProgram* createShader(const std::string* vertFiles, uint vfcount,
+                            const std::string* fragFiles, uint ffcount,
+                            const std::vector<rgl::VertexAttrib>& attribs)
+{
+    std::string vertSrc;
+    std::string fragSrc;
+
+    for (uint i = 0; i < vfcount; i++) {
+        vertSrc += rutils::readFile(assets::SHADER_DIR + vertFiles[i]);
+    }
+
+    for (uint i = 0; i < ffcount; i++) {
+        fragSrc += rutils::readFile(assets::SHADER_DIR + fragFiles[i]);
+    }
 
     ShaderProgram* program = new ShaderProgram;
     bool success = program->create(vertSrc, fragSrc, attribs);
 
     if (success) {
         return program;
-    } else {
+    }
+    else {
         std::cout << "Failed creating ShaderProgram "
-                  << vertName << " - " << fragName << std::endl;
+                  << vertFiles[vfcount - 1] << " - " << fragFiles[ffcount - 1] << std::endl;
         delete program;
         return NULL;
     }
 }
+
+rgl::ShaderProgram* createShader(const std::vector<std::string>& vertFiles,
+                                 const std::vector<std::string>& fragFiles,
+                                 const std::vector<rgl::VertexAttrib>& attribs)
+{
+    return createShader(&vertFiles[0], vertFiles.size(),
+                        &fragFiles[0], fragFiles.size(),
+                        attribs);
+}
+
 
 bool initPrograms()
 {
@@ -73,6 +115,43 @@ bool initPrograms()
     if (reflectL == NULL)
         return false;
 
+    terrain = createShader("terrain", VAS_3NT);
+    if (terrain == NULL)
+        return false;
+
+    terrainL = createShader("terrainl", VAS_3NT);
+    if (terrainL == NULL)
+        return false;
+
+    depth = createShader("depth", VAS_3T);
+    if (depth == NULL)
+        return false;
+
+    depthUI = createShader("ui.vert", "depth.frag", VAS_3T);
+    if (depthUI == NULL)
+        return false;
+
+    normalUI = createShader("ui.vert", "normal.frag", VAS_3T);
+    if (normalUI == NULL)
+        return false;
+
+    positionUI = createShader("ui.vert", "position.frag", VAS_3T);
+    if (positionUI == NULL)
+        return false;
+
+    UI = createShader("ui.vert", "t.frag", VAS_3T);
+    if (UI == NULL)
+        return false;
+
+    gpmaterial = createShader("gpmaterial", VAS_3NT);
+    if (gpmaterial == NULL)
+        return false;
+
+    gpterrain = createShader("gpterrain", VAS_3NT);
+    if (gpterrain == NULL)
+        return false;
+
+    lightPass = createShader("lightpass.vert", "lightpass.frag", VAS_3);
     return true;
 }
 

@@ -18,6 +18,8 @@ public:
     float getAspectRatio() const {return aspectRatio;}
     float getNear() const {return near;};
     float getFar() const {return far;}
+    float getXRatio() const { return xRatio; }
+    float getYRatio() const { return yRatio; }
     void setFov(float fov);
     void setAspectRatio(float aspectRatio);
     void set(float fov, float aspectRatio, float near, float far);

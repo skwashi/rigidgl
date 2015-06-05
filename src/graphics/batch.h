@@ -64,8 +64,8 @@ protected:
 
 template <typename V>
 inline Batch<V>::Batch(GLenum usage, GLenum mode)
+    : rgl::VBuffer<V>(usage)
 {
-    rgl::VBuffer<V>::VBuffer(usage);
     this->mode = mode;
     flushing = false;
 }
@@ -74,11 +74,11 @@ template <typename V>
 inline Batch<V>::Batch(uint vertexCapacity, uint IndexCapacity,
                        bool flushing,
                        GLenum usage, GLenum mode)
+    : rgl::VBuffer<V>(usage)
 {
-    rgl::VBuffer<V>::VBuffer(usage);
     this->indexCapacity = indexCapacity;
     this->vertexCapacity = vertexCapacity;
-    reserve(vertexCapacity, indexCapacity);
+    this->reserve(vertexCapacity, indexCapacity);
     this->flushing = flushing;
     this->mode = mode;
 }
@@ -123,7 +123,7 @@ inline void Batch<V>::render()
 {
     if (program != NULL) {
         program->use();
-        render(program);
+        render(*program);
     } else {
         bind();
         rgl::VBuffer<V>::render(mode);

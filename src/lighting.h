@@ -11,6 +11,7 @@
 #include "glapp.h"
 #include "gl/shaderprogram.h"
 #include "gl/vertexbuffer.h"
+#include "gl/framebuffer.h"
 
 class Lighting : public GLApp
 {
@@ -22,6 +23,7 @@ private:
 
     rgl::ShaderProgram* program = NULL;
     rgl::ShaderProgram* qprogram = NULL;
+
 };
 
 #endif

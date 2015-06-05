@@ -82,6 +82,24 @@ public:
             return rm::Movable3::getTransform();
     }
 
+    void syncWorldTransform()
+    {
+        node->updateWorldTransform();
+    }
+
+    void syncLocalTransform()
+    {
+        if (node && node->parent) {
+            rm::Tr3&
+                tP = node->parent->getWorldTransform(),
+                tW = getWorldTransform();
+            // tW = tP * tL => tP-1 tW = tL;
+            rm::Movable3::setTransform(rm::multIA(tP, tW));
+        }
+        else
+            rm::Movable3::setTransform(getWorldTransform());
+    }
+
     // Movement in world
 
     glm::vec3 getPositionW() const
@@ -92,6 +110,13 @@ public:
     glm::quat getRotationW() const
     {
         return getWorldTransform().q;
+    }
+
+    void moveToW(const glm::vec3& pos, bool sync = true)
+    {
+        getWorldTransform().setPosition(pos);
+        if (sync)
+            syncLocalTransform();
     }
 
     // World coordinate system

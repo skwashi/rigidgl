@@ -13,11 +13,14 @@
 #include "pipeline.h"
 #include "shaderprogram.h"
 #include "shaderprograms.h"
+#include "framebuffer.h"
 #include "textureutils.h"
 #include "vertexarray.h"
 #include "vertexattrib.h"
 #include "vertex.h"
 #include "vertexbuffer.h"
+#include "glutils.h"
+#include "renderable.h"
 
 namespace rgl
 {

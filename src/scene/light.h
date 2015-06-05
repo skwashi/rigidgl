@@ -19,8 +19,6 @@
 extern const std::string UL_TYPE;
 extern const std::string UL_POSITION;
 extern const std::string UL_DIRECTION;
-extern const std::string UL_COLOR;
-extern const std::string UL_INTENSITY;
 extern const std::string UL_AMBIENT;
 extern const std::string UL_DIFFUSE;
 extern const std::string UL_SPECULAR;
@@ -115,8 +113,6 @@ public:
 
     Type type = POINT;
 
-    glm::vec3 color;
-    glm::vec3 intensity;
     glm::vec3 ambient;
     glm::vec3 diffuse;
     glm::vec3 specular;

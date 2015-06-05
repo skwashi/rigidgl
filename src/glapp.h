@@ -10,6 +10,8 @@
 
 #include "gl/pipeline.h"
 #include "gl/shaderprogram.h"
+#include "gl/vertexbuffer.h"
+#include "gl/framebuffer.h"
 #include "camera.h"
 #include "scene/scenegraph.h"
 #include "scene/scene.h"
@@ -90,6 +92,8 @@ public:
         STOPPED = 3
     };
 
+    static GLApp* instance;
+
     GLApp()
     {
     }
@@ -115,6 +119,7 @@ protected:
     void initGLEW();
     virtual void initGL();
     void initPrograms();
+    virtual void initBuffers();
     void initTime();
     void updateTime();
     void updateFPS();
@@ -134,6 +139,8 @@ protected:
     virtual void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
     virtual void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
+    void setTimeScale(double timeScale) { this->timeScale = timeScale; }
+
     State state;
     int width;
     int height;
@@ -145,6 +152,9 @@ protected:
     double prevTime; // time at last frame
     double dt; // time - prevTime
     double runningTime; // time while not paused
+    double timeScale = 1;
+    double worldTime;
+    double wdt; // timeScale * dt
 
     int frameCount;
     int fps;
@@ -160,6 +170,14 @@ protected:
     struct {
         float cameraSpeed = 20;
     } _settings;
+
+    static const int numToggles = 10;
+    bool toggles[numToggles];
+    // VertexBuffers
+    rgl::VBuffer<rgl::Vertex3t>* vbuffer3t;
+
+    // FrameBuffers
+    rgl::FrameBuffer* gbuffer;
 };
 
 #endif

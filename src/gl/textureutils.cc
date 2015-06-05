@@ -21,7 +21,7 @@ GLTexture* createTexture(const std::string& filename, bool mipmap)
     byte* data;
 
     if (rutils::loadImage(fname, width, height, bpp, &data)) {
-        GLTexture* tex = new GLTexture(bpp == 24 ? GL_RGB : GL_RGBA, bpp == 24 ? GL_BGR : GL_BGRA, width, height, data, mipmap);
+        GLTexture* tex = new GLTexture(bpp == 24 ? GL_SRGB8 : GL_SRGB8_ALPHA8, bpp == 24 ? GL_BGR : GL_BGRA, width, height, data, mipmap);
         free(data);
         return tex;
     } else {
@@ -64,7 +64,7 @@ CubeMap* createCubeMap(const std::string* filenames, bool mipmap)
         return NULL;
     }
 
-    CubeMap* cubeMap = new CubeMap(bpp == 24 ? GL_RGB : GL_RGBA,
+    CubeMap* cubeMap = new CubeMap(bpp == 24 ? GL_SRGB : GL_SRGB8_ALPHA8,
                                    size);
 
     FreeImage_FlipVertical(bitmap);

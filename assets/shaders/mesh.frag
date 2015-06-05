@@ -17,8 +17,6 @@ struct Material {
 };
 
 const int ALL = ~0;
-const int LIGHT = 1 << 0;
-const int MATERIAL = 1 << 1;
 const int AMBIENT = 1 << 2;
 const int DIFFUSE = 1 << 3;
 const int SPECULAR = 1 << 4;
@@ -26,7 +24,7 @@ const int ATTENUATION = 1 << 5;
 const int GAMMA =  1 << 6;
 const int INVERTCOLOR = 1 << 7;
 const int NORMALCOLORS = 1 << 8;
-const int STANDARD = LIGHT | MATERIAL | AMBIENT | DIFFUSE | SPECULAR | ATTENUATION | GAMMA;
+const int STANDARD = AMBIENT | DIFFUSE | SPECULAR | ATTENUATION | GAMMA;
 
 uniform Light light;
 uniform Material mat;

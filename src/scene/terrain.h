@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 #include <noise/noise.h>
 #include <vector>
+#include <utility>
 #include <functional>
 
 #include "math/glmutils.h"
@@ -30,12 +31,16 @@ public:
     TerrainChunk(glm::vec3 offset, size_t size);
     ~TerrainChunk();
 
+    float getHeight(float x, float z);
     void zero();
     void displaceCircle(int x, int y, float radius);
     void displaceCircles(float min_r, float max_r, uint iterations);
-    void displacePerlin(noise::module::Perlin& perlin);
+    void displace(noise::module::Module& noise);
+    void displace(noise::module::Module& noise, float floor, float high);
+    void displace(noise::module::Module& noise, float hmin, float hmax, float low, float high);
     void normalize();
     void computeNormals();
+    void computeTexCoords();
     void bufferData();
 
 private:
@@ -43,8 +48,9 @@ private:
     size_t size;
     float** heights;
     glm::vec3** normals;
+    glm::vec2** texCoords;
 
-    rgl::VBuffer<rgl::Vertex3n> vertexBuffer;
+    rgl::VBuffer<rgl::Vertex3nt> vertexBuffer;
 };
 
 
@@ -54,14 +60,19 @@ public:
     Terrain(size_t chunkSize);
     ~Terrain();
 
+    float getHeight(glm::vec3 pos);
+    glm::vec3 getTop(glm::vec3 pos);
+
     void forAll(std::function<void(TerrainChunk*)> f)
     {
         for (TerrainChunk* chunk : chunks)
             f(chunk);
     }
 
+    using rgl::Renderable::updateMatrices;
     void updateMatrices() {
-        normalMatrix = glm::mat3(glm::transpose(glm::inverse(modelMatrix)));
+        inverseModelMatrix = glm::inverse(modelMatrix);
+        normalMatrix = glm::mat3(glm::transpose(inverseModelMatrix));
     }
 
     void render(rgl::ShaderProgram& program) {
@@ -71,10 +82,13 @@ public:
         for (TerrainChunk* chunk : chunks)
             chunk->vertexBuffer.render();
     }
+    using rgl::Renderable::render;
 
     size_t chunkSize;
     std::vector<TerrainChunk*> chunks;
+    noise::module::Select noise;
     rgl::GLTexture* texture;
+    glm::mat4 inverseModelMatrix;
 };
 
 

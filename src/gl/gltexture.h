@@ -7,6 +7,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <vector>
 
 namespace rgl
 {
@@ -14,6 +15,7 @@ namespace rgl
 class GLTexture
 {
 public:
+
     static const GLint DEFAULT_MIN_FILTER = GL_LINEAR;
     static const GLint DEFAULT_MIN_FILTER_MIPMAP = GL_LINEAR_MIPMAP_LINEAR;
     static const GLint DEFAULT_MAG_FILTER = GL_LINEAR;
@@ -21,9 +23,11 @@ public:
     static const GLint DEFAULT_WRAP_S = GL_REPEAT;
     static const GLint DEFAULT_WRAP_T = GL_REPEAT;
     static const GLint DEFAULT_WRAP = GL_REPEAT;
-    static const GLint DEFAULT_INTERNAL_FORMAT = GL_RGBA8;
+    static const GLint DEFAULT_INTERNAL_FORMAT = GL_RGBA;
     static const GLenum DEFAULT_FORMAT = GL_RGBA;
     static const GLenum DEFAULT_TYPE = GL_UNSIGNED_BYTE;
+
+    static GLenum defaultFormat(GLint internalFormat);
 
     GLTexture() {}
 
@@ -53,13 +57,29 @@ public:
     GLTexture(GLenum format, GLsizei width, GLsizei height, const GLvoid* data, bool mipmap, GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT)
         : GLTexture(DEFAULT_INTERNAL_FORMAT, format, width, height, data, mipmap, minFilter, magFilter, wrapS, wrapT) {}
 
-    GLTexture(GLint internalFormat, GLenum format, GLsizei width, GLsizei height,const GLvoid* data, bool mipmap, GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT);
+    GLTexture(GLint internalFormat, GLenum format, GLsizei width, GLsizei height, const GLvoid* data, bool mipmap, GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT)
+        : GLTexture(internalFormat, format, DEFAULT_TYPE, width, height, data, mipmap, minFilter, magFilter, wrapS, wrapT) {}
 
-    ~GLTexture();
+    GLTexture(GLint internalFormat, GLenum format, GLenum type, GLsizei width, GLsizei height, const GLvoid* data, GLint filter, GLint wrap)
+        : GLTexture(internalFormat, format, type, width, height, data, false, filter, filter, wrap, wrap) {}
+
+    GLTexture(GLint internalFormat, GLenum format, GLenum type, GLsizei width, GLsizei height, const GLvoid* data, GLint minFilter, GLint magFilter, GLint wrap)
+        : GLTexture(internalFormat, format, type, width, height, data, false, minFilter, magFilter, wrap, wrap) {}
+
+    GLTexture(GLint internalFormat, GLenum format, GLenum type, GLsizei width, GLsizei height, GLint filter, GLint wrap)
+        : GLTexture(internalFormat, format, type, width, height, NULL, false, filter, filter, wrap, wrap) {}
+
+    GLTexture(GLint internalFormat, GLenum format, GLenum type, GLsizei width, GLsizei height, GLint minFilter, GLint magFilter, GLint wrap)
+        : GLTexture(internalFormat, format, type, width, height, NULL, false, minFilter, magFilter, wrap, wrap) {}
+
+    GLTexture(GLint internalFormat, GLenum format, GLenum type, GLsizei width, GLsizei height, const GLvoid* data, bool mipmap, GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT);
+
+    virtual ~GLTexture();
 
     GLuint getId() const { return textureId; }
     GLsizei getWidth() const { return width; }
     GLsizei getHeight() const { return height; }
+    void resize(GLsizei width, GLsizei height);
 
     void setInternalFormat(GLint internalFormat);
     virtual void setParam(GLenum pname, GLint param);
@@ -85,6 +105,8 @@ protected:
     GLsizei width;
     GLsizei height;
     GLint internalFormat = DEFAULT_INTERNAL_FORMAT;
+    GLenum format = DEFAULT_FORMAT;
+    GLenum type = DEFAULT_TYPE;
 
     void setPackUnpackAlignment();
 };
