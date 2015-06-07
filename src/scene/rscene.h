@@ -12,9 +12,12 @@
 #include "meshes.h"
 #include "model.h"
 #include "node.h"
+#include "material.h"
+#include "pmaterial.h"
 #include "scene.h"
 #include "scenegraph.h"
 #include "skybox.h"
+#include "terrain.h"
 
 namespace rscene {
 

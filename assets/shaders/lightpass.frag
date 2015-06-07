@@ -1,16 +1,24 @@
 #version 130
 
+const int ALL = ~0;
+const int AMBIENT = 1 << 2;
+const int DIFFUSE = 1 << 3;
+const int SPECULAR = 1 << 4;
+const int ATTENUATION = 1 << 5;
+const int GAMMA =  1 << 6;
+const int STANDARD = AMBIENT | DIFFUSE | SPECULAR | ATTENUATION | GAMMA;
+
 struct Light {
     int type;
     vec3 position;
     vec3 direction;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    vec3 color;
+    vec3 intensity;
     vec3 attenuation;
     float radius;
 };
 
+uniform int u_flags;
 uniform Light light;
 
 uniform sampler2D albedoMap;
@@ -60,36 +68,57 @@ float attenuation(Light light, float distance) {
 }
 
 void main() {
+    int flags;
+    if (u_flags == 0)
+        flags = STANDARD;
+    else
+        flags = u_flags;
+
     vec2 texCoord = calcTexCoord();
     vec3 pos = calcPosition(texture(depthMap, texCoord).r, texCoord);
-    vec3 normal = decodeNormalOct32(texture(normalMap, texCoord).xy);
-    vec4 albedoShininess = texture(albedoMap, texCoord);
-    vec3 albedo = albedoShininess.rgb;
-    float specularPower = albedoShininess.a * 256;
+    vec4 albedoRoughness = texture(albedoMap, texCoord);
+    vec3 normalMetallic = texture(normalMap, texCoord).rgb;
+    vec3 normal = decodeNormalOct32(normalMetallic.rg);
+    vec3 albedo = albedoRoughness.rgb;
+    float roughness = albedoRoughness.a;
+    float metallic = normalMetallic.b;
 
     vec3 V = normalize(-pos);
     vec3 N = normal;
     vec3 L;
-    float a;
+    float a = 1;
+    float d = 0;
 
     if (light.type == 1) {
         L = -light.direction;
-        a = 1;
     } else {
         vec3 surf_to_light = light.position - pos;
-        float distance = length(surf_to_light);
-        if (distance > light.radius)
-            discard;
-        vec3 L = surf_to_light / distance;
-        a = attenuation(light, distance);
+        d = length(surf_to_light);
+        L = surf_to_light / d;
+        if ((flags & ATTENUATION) > 0)
+            a = attenuation(light, d);
     }
 
-    vec3 linearColor = light.ambient * albedo;
+    if (d > light.radius)
+        discard;
+    else {
+        float diffuseI = 0, specularI = 0;
 
-    linearColor += a * light.diffuse * albedo * diffuse(N, L);
+        if ((flags & AMBIENT) > 0)
+            diffuseI += light.intensity.x;
+        if ((flags & DIFFUSE) > 0)
+            diffuseI += diffuse(N, L) * light.intensity.y;
+        if ((flags & SPECULAR) > 0) {
+            float specularPower = exp2(10*(1-roughness) + 1);
+            specularI = specular(N, L, V, specularPower)
+                * light.intensity.z;
+        }
 
-    linearColor += a * light.specular * vec3(0.04)
-        * specular(N, L, V, specularPower);
+        float intensity = a *
+            ((1 - metallic) * diffuseI + metallic * specularI);
 
-    gl_FragColor = vec4(linearColor, 1);
+        vec3 linearColor = albedo * light.color * intensity;
+
+        gl_FragColor = vec4(linearColor, 1);
+    }
 }

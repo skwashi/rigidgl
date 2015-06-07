@@ -2,8 +2,9 @@
 
 struct Material {
     vec3 albedo;
-    float metalness;
-    float specularPower;
+    vec3 emission;
+    float metallic;
+    float roughness;
 };
 
 uniform sampler2D u_texture;
@@ -13,9 +14,9 @@ in vec3 pass_position;
 in vec3 pass_normal;
 in vec2 pass_texCoord;
 
-out vec4 out_ambient;
+out vec4 out_emission;
 out vec4 out_albedo;
-out vec2 out_normal;
+out vec4 out_normal;
 out float out_z;
 
 vec2 signNotZero(vec2 v) {
@@ -29,8 +30,8 @@ vec2 encodeNormalOct32(vec3 n) {
 
 void main() {
     vec3 normal = normalize(pass_normal);
-    out_ambient = vec4(0.01 * mat.ambient, 1);
-    out_albedo = vec4(mat.diffuse, mat.shininess / 256);
-    out_normal = encodeNormalOct32(normal);
+    out_emission = vec4(mat.emission, 0.5);
+    out_albedo = vec4(mat.albedo, mat.roughness);
+    out_normal = vec4(encodeNormalOct32(normal), mat.metallic, 0);
     out_z = pass_position.z;
 }

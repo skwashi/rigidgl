@@ -2,9 +2,8 @@
 
 struct Light {
     vec3 position;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    vec3 color;
+    vec3 intensity;
     vec3 attenuation;
     float radius;
 };
@@ -23,14 +22,11 @@ float attenuation(float distance) {
 }
 
 void main() {
-    float distance = length(light.position - pass_position);
-     if (distance > light.radius)
-         discard;
-     else {
-         float d = distance;// / light.radius;
-         float a = attenuation(d);
-         //a *= 1 / ( 1 + d * d);
-         float alpha = 1;
-         FragColor = vec4(a * (light.ambient + (light.diffuse + light.specular) / 2.0), a * a );
-     }
+    float d = length(light.position - pass_position);
+    if (d > light.radius)
+        discard;
+    else {
+        float a = attenuation(d);
+        FragColor = vec4(a * light.color, a * a);
+    }
 }

@@ -19,9 +19,8 @@
 extern const std::string UL_TYPE;
 extern const std::string UL_POSITION;
 extern const std::string UL_DIRECTION;
-extern const std::string UL_AMBIENT;
-extern const std::string UL_DIFFUSE;
-extern const std::string UL_SPECULAR;
+extern const std::string UL_COLOR;
+extern const std::string UL_INTENSITY;
 extern const std::string UL_ATTENUATION;
 extern const std::string UL_CONEANGLE;
 extern const std::string UL_RADIUS;
@@ -39,19 +38,15 @@ public:
 
     Light() {}
 
-    Light(const glm::vec3& ambient,
-          const glm::vec3& diffuse,
-          const glm::vec3& specular,
+    Light(const glm::vec3& color,
+          const glm::vec3& intensity,
           const glm::vec3& attenuation)
-        : ambient(ambient), diffuse(diffuse),
-          specular(specular), attenuation(attenuation) {}
+        : color(color), intensity(intensity), attenuation(attenuation) {}
 
-    Light(const glm::vec3& ambient,
-          const glm::vec3& diffuse,
-          const glm::vec3& specular,
+    Light(const glm::vec3& color,
+          const glm::vec3 intensity,
           float attenuation)
-        : ambient(ambient), diffuse(diffuse),
-          specular(specular)
+        : color(color), intensity(intensity)
     {
         this->attenuation =
             glm::vec3(1.0f, attenuation, attenuation * attenuation);
@@ -60,20 +55,16 @@ public:
     Light(const glm::vec3& color, float ambientIntensity,
           float diffuseIntensity, float specularIntensity,
           glm::vec3 attenuation)
-    {
-        ambient = color * ambientIntensity;
-        diffuse = color * diffuseIntensity;
-        specular = color * specularIntensity;
-        this->attenuation = attenuation;
-    }
+        : color(color),
+          intensity(ambientIntensity, diffuseIntensity, specularIntensity),
+          attenuation(attenuation) {}
 
     Light(const glm::vec3& color, float ambientIntensity,
           float diffuseIntensity, float specularIntensity,
           float attenuation)
+        : color(color),
+          intensity(ambientIntensity, diffuseIntensity, specularIntensity)
     {
-        ambient = color * ambientIntensity;
-        diffuse = color * diffuseIntensity;
-        specular = color * specularIntensity;
         this->attenuation =
             glm::vec3(1.0f, attenuation, attenuation * attenuation);
     }
@@ -113,9 +104,8 @@ public:
 
     Type type = POINT;
 
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
+    glm::vec3 color;
+    glm::vec3 intensity;
     glm::vec3 attenuation;
 
     glm::vec3 direction = glm::vec3(0, 0, -1);

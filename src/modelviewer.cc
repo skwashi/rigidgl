@@ -61,12 +61,8 @@ void ModelViewer::initTweakBar()
 
     // // light
     TwAddVarRW(tweakBar, "light.position", TW_TYPE_DIR3F, &settings.lightPosition, "");
-    TwAddVarRW(tweakBar, "light.ambient", TW_TYPE_COLOR3F,
-               &light->ambient, " colormode = hls ");
-    TwAddVarRW(tweakBar, "light.diffuse", TW_TYPE_COLOR3F,
-               &light->diffuse, " colormode = hls ");
-    TwAddVarRW(tweakBar, "light.specular", TW_TYPE_COLOR3F,
-               &light->specular, " colormode = hls ");
+    TwAddVarRW(tweakBar, "light.color", TW_TYPE_COLOR3F,
+               &light->color, " ");
     TwAddVarRW(tweakBar, "light.attenuation", TW_TYPE_COLOR3F,
                &light->attenuation, " ");
     TwAddVarRW(tweakBar, "light.radius", TW_TYPE_FLOAT,
@@ -104,20 +100,15 @@ void ModelViewer::initLights()
 
     Light * light;
 
-    light = new Light(vec3(1, 1, 1),
-                      vec3(0.5f, 0.5f, 0.5f),
-                      vec3(0.5f, 0.5f, 0.5f),
-                      0.01f);
+    light = new Light(vec3(1, 1, 1), 1.f, 0.5f, 0.5f, 0.01f);
+
     light->radius = 2;
     settings.lightPosition = vec3(-5, 5, 5);
     light->moveTo(settings.lightPosition);
     scene.addLight(light);
     this->light = light;
 
-    light = new Light(vec3(0, 0, 0),
-                      vec3(0.1f, 0.1f, 0.5f),
-                      vec3(0.5f, 0.5f, 0.5f),
-                      0.01f);
+    light = new Light(vec3(0.5f, 0.5f, 0.5f), 0, 0.2f, 1.f, 0.01f);
 
     light->radius = 2;
     light->attachNode(sceneGraph.allocateNode());
@@ -126,10 +117,8 @@ void ModelViewer::initLights()
 
     scene.addLight(light);
 
-    light = new Light(vec3(0, 0, 0),
-                      vec3(1.f, 0, 0),
-                      vec3(1.f, 0, 0),
-                      1.f);
+    light = new Light(vec3(1, 0, 0), 0, 1, 1, 1);
+
     light->moveTo(1, 2, 0);
     light->radius = 1;
     scene.addLight(light);

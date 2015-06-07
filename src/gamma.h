@@ -5,12 +5,11 @@
  * @date 2015-05-16
  */
 
-#ifndef TERRAINTEST_H
-#define TERRAINTEST_H
+#ifndef GAMMA_H
+#define GAMMA_H
 
 #include "glapp.h"
-#include "scene/terrain.h"
-#include "scene/skybox.h"
+#include "scene/rscene.h"
 
 class Gamma : public GLApp
 {
@@ -38,28 +37,33 @@ private:
 
     struct {
         uint maxLights = 1024;
-        uint numLights = 256;
+        uint numLights = 64;
         bool directionalLight = true;
         bool pointLights = true;
         bool renderLights = false;
         bool renderSkybox = true;
-        bool specularLighting = true;
+        bool renderTerrain = true;
+        bool renderModel = true;
+        bool ambientLighting = true;
         bool diffuseLighting = true;
+        bool specularLighting = true;
         bool showDepth = false;
         bool showNormals = false;
         bool showAlbedo = false;
         bool wireframe = false;
         glm::vec3 lightAttenuation;
+        bool attenuation = true;
         float lightRadius;
         glm::vec3 lightDirection;
         float heightAboveTerrain = 15;
         bool gamma = true;
+        int flags;
     } settings;
 
     Light directionalLight;
     Terrain* terrain;
-    Material material;
-    Model model;
+    PMaterial material;
+    Model* model;
     Skybox* skybox;
 };
 

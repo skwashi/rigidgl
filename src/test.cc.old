@@ -1,7 +1,6 @@
 #include "glapp.h"
-#include "lighting.h"
-#include "cubes.h"
 #include "gamma.h"
+#include "cubes.h"
 #include "modelviewer.h"
 #include "cubemaps.h"
 
@@ -25,12 +24,12 @@ int main(int argc, char* argv[])
             app = new Gamma;
             break;
         default:
-            app = new Lighting;
+            app = new Gamma;
             break;
         }
     }
     else {
-        app = new Lighting;
+        app = new Gamma;
     }
     app->init(640, 480);
     app->run();

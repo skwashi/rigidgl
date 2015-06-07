@@ -17,6 +17,7 @@
 #include "../gl/gltexture.h"
 #include "../gl/renderable.h"
 #include "material.h"
+#include "pmaterial.h"
 
 class Model : public Noded, public rgl::Renderable
 {
@@ -41,6 +42,7 @@ public:
     void setMesh(rgl::Mesh* mesh) { this->mesh = mesh; }
     void setTexture(rgl::GLTexture* texture) { this->texture = texture; }
     void setMaterial(Material material) { this->material = material; }
+    void setMaterial(PMaterial pmaterial) { this->pmaterial = pmaterial; }
 
     // virtual in renderable
     using rgl::Renderable::updateMatrices;
@@ -55,6 +57,8 @@ private:
     rgl::Mesh* mesh = NULL;
     rgl::GLTexture* texture = NULL;
     Material material = DEFAULT_MATERIAL;
+    PMaterial pmaterial = DEFAULT_PMATERIAL;
+
 };
 
 

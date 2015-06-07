@@ -7,9 +7,9 @@ in vec3 pass_position_w;
 in vec3 pass_normal;
 in vec2 pass_texCoord;
 
-out vec4 out_ambient;
+out vec4 out_emission;
 out vec4 out_albedo;
-out vec2 out_normal;
+out vec4 out_normal;
 out float out_z;
 
 vec2 signNotZero(vec2 v) {
@@ -32,6 +32,17 @@ vec4 mod289(vec4 x) {
 vec4 permute(vec4 x) {
      return mod289(((x*34.0)+1.0)*x);
 }
+
+//
+// Description : Array and textureless GLSL 2D/3D/4D simplex
+//               noise functions.
+//      Author : Ian McEwan, Ashima Arts.
+//  Maintainer : ijm
+//     Lastmod : 20110822 (ijm)
+//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.
+//               Distributed under the MIT License. See LICENSE file.
+//               https://github.com/ashima/webgl-noise
+//
 
 vec4 taylorInvSqrt(vec4 r)
 {
@@ -121,10 +132,10 @@ void main() {
 
     vec3 normal = normalize(pass_normal);
     vec3 diffuse = texture(u_texture, pass_texCoord + offset).rgb;
-    float shininess = (height < 0.05 || height > 0.95) ? 256.0 : 64 * height / 256.0;
-    out_ambient = vec4(0.001 * diffuse, 1);
-    out_albedo = vec4(diffuse, 1 / 256.0);
-
-    out_normal = encodeNormalOct32(normal);
+    float metalness = 0.04;
+    float roughness = (height <= 0.01) ? 0.5 : 0.95;
+    out_emission = vec4(diffuse * (height <= 0.01 ? 0.01 : 0), 1);
+    out_albedo = vec4(diffuse, roughness);
+    out_normal = vec4(encodeNormalOct32(normal), metalness, 0);
     out_z = pass_position.z;
 }

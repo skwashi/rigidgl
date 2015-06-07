@@ -27,6 +27,7 @@ void Model::updateUniforms(ShaderProgram& program) const
 {
     Renderable::updateUniforms(program);
     material.updateUniforms(program);
+    pmaterial.updateUniforms(program);
 }
 
 void Model::render(ShaderProgram& program)

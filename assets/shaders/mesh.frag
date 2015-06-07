@@ -47,11 +47,11 @@ float specular(vec3 N, vec3 L, vec3 V, float power) {
     return nF * pow(max(dot(H, N), 0), power);
 }
 
-float attenuation(float distance) {
+float attenuation(float d) {
     float a = light.attenuation.x;
     float b = light.attenuation.y;
     float c = light.attenuation.z;
-    return 1 / (a + b * distance + c * distance * distance);
+    return 1 / (a + b * d + c * d * d);
 }
 
 void main() {
@@ -63,12 +63,12 @@ void main() {
         flags = u_flags;
 
     vec3 surf_to_light = light.position - pass_position;
-    float distance = length(surf_to_light);
-    vec3 L = surf_to_light / distance;
+    float d = length(surf_to_light);
+    vec3 L = surf_to_light / d;
     vec3 V = normalize(-pass_position);
     vec3 N = normalize(pass_normal);
 
-    float a = ((flags & ATTENUATION) > 0) ? attenuation(distance) : 1;
+    float a = ((flags & ATTENUATION) > 0) ? attenuation(d) : 1;
 
     vec3 linearColor = vec3(0, 0, 0);
     if ((flags & AMBIENT) > 0) {

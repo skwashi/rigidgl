@@ -33,8 +33,7 @@ public:
     enum SHADER_FLAGS
     {
         ALL = ~0,
-        LIGHT = 1 << 0,
-        MATERIAL = 1 << 1,
+        BASE = 1 << 0,
         AMBIENT = 1 << 2,
         DIFFUSE = 1 << 3,
         SPECULAR = 1 << 4,
@@ -42,8 +41,8 @@ public:
         GAMMA = 1 << 6,
         INVERTCOLOR = 1 << 7,
         NORMALCOLORS = 1 << 8,
-        STANDARD = LIGHT | AMBIENT | DIFFUSE | SPECULAR | ATTENUATION | GAMMA,
-        BASE = LIGHT | MATERIAL
+        STANDARD = AMBIENT | DIFFUSE | SPECULAR | ATTENUATION | GAMMA,
+        NONE = 0
     };
 
     ShaderProgram();
