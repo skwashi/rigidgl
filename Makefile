@@ -5,6 +5,7 @@ CC=g++
 RM=rm -f
 SRCDIR=src
 BUILDDIR=build
+BINDIR=bin
 CFLAGS=-g -Wall
 #CCFLAGS=-g -Wall -std=c++11
 CCFLAGS=-O3 -pipe -Wall -std=c++11
@@ -20,6 +21,9 @@ GLOBJ=$(GLSRC:$(SRCDIR)/gl/%.cc=$(BUILDDIR)/gl/%.o)
 SCENEOBJ=$(SCENESRC:$(SRCDIR)/scene/%.cc=$(BUILDDIR)/scene/%.o)
 INPUTOBJ=$(INPUTSRC:$(SRCDIR)/input/%.cpp=$(BUILDDIR)/input/%.o)
 OBJ=$(SRC:$(SRCDIR)/%.cc=$(BUILDDIR)/%.o)
+
+$(BINDIR):
+	@mkdir -p $(BINDIR)
 
 $(GLOBJ): $(BUILDDIR)/gl/%.o : $(SRCDIR)/gl/%.cc
 	@echo "Compiling gl object files..."
@@ -46,7 +50,7 @@ $(TARGET): $(GLOBJ) $(SCENEOBJ) $(INPUTOBJ) $(OBJ)
 	@echo "Linking..."
 	$(CC) $(CCFLAGS) $(INCS) $(LIBS) $(GLOBJ) $(SCENEOBJ) $(INPUTOBJ) $(OBJ) -o $(TARGET)
 
-all:	$(TARGET)
+all: $(BINDIR) $(TARGET)
 
 clean:
 	@echo "Cleaning..."
